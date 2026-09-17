@@ -51,6 +51,15 @@ export interface SiteConfig {
   /** Skills: grouped plain lists — no bars, no percentages */
   skills: Record<string, string[]>;
 
+  /** Education, most recent first */
+  education: {
+    degree: string;
+    institution: string;
+    start: string;
+    /** Omit for ongoing */
+    end?: string;
+  }[];
+
   /** Feature flags reserved for later modules. Keep false until built. */
   features: {
     synthHover: boolean;
@@ -102,12 +111,16 @@ export const siteConfig: SiteConfig = {
     'Placeholder: third sentence about what you are looking for.',
   ],
 
-  // TODO: fill in real skills
   skills: {
-    Web: ['Placeholder'],
-    Design: ['Placeholder'],
-    Tools: ['Placeholder'],
+    Web: ['HTML', 'CSS', 'JavaScript', 'Python', 'Node.js', 'WordPress'],
+    Design: ['Figma', 'Canva', 'UI/UX'],
+    Tools: ['Power BI', 'Microsoft 365', 'CapCut', 'PowerPoint'],
   },
+
+  education: [
+    { degree: 'BSc in Computer Science & Engineering', institution: 'North South University', start: '2022' },
+    { degree: 'HSC, Science', institution: 'Adamjee Cantonment College', start: '2019', end: '2021' },
+  ],
 
   features: {
     synthHover: false,
