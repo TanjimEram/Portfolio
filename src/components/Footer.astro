@@ -1,0 +1,16 @@
+---
+import { siteConfig } from '../site.config';
+
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border">
+  <div class="container-narrow flex flex-col gap-3 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+    <p>© {year} {siteConfig.name}</p>
+    <ul class="flex gap-4">
+      <li><a href={siteConfig.links.github} class="hover:text-accent" rel="me noopener" target="_blank">GitHub</a></li>
+      <li><a href={siteConfig.links.linkedin} class="hover:text-accent" rel="me noopener" target="_blank">LinkedIn</a></li>
+      <li><a href={`mailto:${siteConfig.email}`} class="hover:text-accent">Email</a></li>
+    </ul>
+  </div>
+</footer>

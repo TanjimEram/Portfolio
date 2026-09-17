@@ -1,0 +1,66 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css';
+import { siteConfig } from '../site.config';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Per-page accent override (project "chameleon"). Any CSS color. */
+  accent?: string;
+}
+
+const { title, description = siteConfig.seo.description, accent } = Astro.props;
+const pageTitle = title ? `${title} — ${siteConfig.seo.title}` : siteConfig.seo.title;
+const canonical = siteConfig.seo.url ? new URL(Astro.url.pathname, siteConfig.seo.url).href : undefined;
+const rootStyle = accent ? `--color-accent: ${accent};` : undefined;
+---
+
+<!doctype html>
+<html lang={siteConfig.seo.lang} style={rootStyle}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    {canonical && <link rel="canonical" href={canonical} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="color-scheme" content="dark light" />
+
+    {/* Apply saved theme before first paint; re-apply after view-transition swaps. */}
+    <script is:inline>
+      (function () {
+        function apply() {
+          try {
+            var t = localStorage.getItem('theme');
+            if (t !== 'light' && t !== 'dark') {
+              t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+            }
+            document.documentElement.dataset.theme = t;
+          } catch {}
+        }
+        apply();
+        document.addEventListener('astro:after-swap', apply);
+      })();
+    </script>
+
+    <ClientRouter />
+  </head>
+  <body class="flex min-h-dvh flex-col bg-bg text-text antialiased">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-contrast"
+    >
+      Skip to content
+    </a>
+    <Nav />
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

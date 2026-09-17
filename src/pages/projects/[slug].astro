@@ -1,0 +1,51 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { title, summary, tech, repo, live, color } = project.data;
+---
+
+<BaseLayout title={title} description={summary} accent={color}>
+  <article class="container-narrow py-16">
+    <a href="/#projects" class="text-sm text-muted hover:text-accent">← Projects</a>
+    <h1 class="mt-6 text-3xl font-semibold tracking-tight">{title}</h1>
+    <p class="mt-3 text-lg text-muted">{summary}</p>
+
+    {
+      tech.length > 0 && (
+        <ul class="mt-6 flex flex-wrap gap-2 font-mono text-xs text-muted">
+          {tech.map((t) => (
+            <li class="rounded border border-border px-2 py-1">{t}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    <div class="mt-6 flex gap-4 text-sm">
+      {live && <a href={live} class="text-accent hover:underline" target="_blank" rel="noopener">Live site ↗</a>}
+      {repo && <a href={repo} class="text-accent hover:underline" target="_blank" rel="noopener">Source ↗</a>}
+    </div>
+
+    <div class="prose-basic mt-10">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .prose-basic :global(p) {
+    margin-block: 1em;
+    line-height: 1.7;
+  }
+  .prose-basic :global(a) {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+</style>
