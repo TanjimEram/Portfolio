@@ -4,13 +4,13 @@ import { siteConfig } from '../site.config';
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t border-border">
-  <div class="container-narrow flex flex-col gap-3 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+<footer class="relative z-10 border-t border-border">
+  <div class="container-wide flex flex-col gap-3 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
     <p>© {year} {siteConfig.name}</p>
-    <ul class="flex gap-4">
-      <li><a href={siteConfig.links.github} class="inline-block py-1 hover:text-accent" rel="me noopener" target="_blank">GitHub</a></li>
-      <li><a href={siteConfig.links.linkedin} class="inline-block py-1 hover:text-accent" rel="me noopener" target="_blank">LinkedIn</a></li>
-      <li><a href={`mailto:${siteConfig.email}`} class="inline-block py-1 hover:text-accent">Email</a></li>
+    <ul class="flex gap-5">
+      <li><a href={siteConfig.links.github} class="inline-block py-1 transition-colors hover:text-accent-ink" rel="me noopener" target="_blank">GitHub</a></li>
+      <li><a href={siteConfig.links.linkedin} class="inline-block py-1 transition-colors hover:text-accent-ink" rel="me noopener" target="_blank">LinkedIn</a></li>
+      <li><a href={`mailto:${siteConfig.email}`} class="inline-block py-1 transition-colors hover:text-accent-ink">Email</a></li>
     </ul>
   </div>
 </footer>

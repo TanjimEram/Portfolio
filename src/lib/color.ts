@@ -90,27 +90,32 @@ export function contrastColor(color: RGB): string {
 }
 
 export interface AccentSet {
-  /** Adjusted for the dark theme background */
+  /** Raw colour for fills/decoration on the dark theme */
   dark: string;
+  /** Same hue, nudged to ≥ 4.7:1 on the dark surface — use for text */
+  darkInk: string;
+  /** Text colour on top of `dark` */
   darkContrast: string;
-  /** Adjusted for the light theme background */
   light: string;
+  lightInk: string;
   lightContrast: string;
 }
 
-/** Theme backgrounds — keep in sync with src/styles/theme.css */
-const DARK_BG: RGB = [10, 10, 10];
-const LIGHT_BG: RGB = [255, 255, 255];
+/** Theme surfaces — keep in sync with src/styles/theme.css (text sits on bg AND surfaces, so test the lighter one) */
+const DARK_SURFACE: RGB = [0x1c, 0x1c, 0x20];
+const LIGHT_SURFACE: RGB = [255, 255, 255];
 
 export function accentSet(hex: string): AccentSet {
   const base = hexToRgb(hex);
-  // Slightly above 4.5 so the colour also passes on the tinted bg and on surfaces.
-  const dark = ensureContrast(base, DARK_BG, 4.7);
-  const light = ensureContrast(base, LIGHT_BG, 4.7);
+  // Fills keep the raw colour; ink variants are corrected for AA text contrast.
+  const darkInk = ensureContrast(base, DARK_SURFACE, 4.7);
+  const lightInk = ensureContrast(base, LIGHT_SURFACE, 4.7);
   return {
-    dark: rgbToHex(dark),
-    darkContrast: contrastColor(dark),
-    light: rgbToHex(light),
-    lightContrast: contrastColor(light),
+    dark: rgbToHex(base),
+    darkInk: rgbToHex(darkInk),
+    darkContrast: contrastColor(base),
+    light: rgbToHex(base),
+    lightInk: rgbToHex(lightInk),
+    lightContrast: contrastColor(base),
   };
 }

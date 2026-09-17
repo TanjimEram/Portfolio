@@ -2,21 +2,26 @@
 import { getCollection } from 'astro:content';
 import Section from './Section.astro';
 
+interface Props {
+  number?: number;
+}
+const { number } = Astro.props;
+
 const entries = (await getCollection('achievements')).sort(
   (a, b) => (b.data.year ?? 0) - (a.data.year ?? 0) || a.data.title.localeCompare(b.data.title),
 );
 ---
 
-<Section id="achievements" title="Achievements">
-  <ul class="grid gap-4 sm:grid-cols-2">
+<Section id="achievements" title="Achievements" number={number} wide>
+  <ul class="grid gap-5 sm:grid-cols-2" data-reveal-group>
     {
       entries.map(({ data }) => (
-        <li class="rounded border border-border p-4">
+        <li class="card p-6" data-reveal>
           <div class="flex items-baseline justify-between gap-3 font-mono text-xs text-muted">
-            <span class="capitalize">{data.category}</span>
+            <span class="uppercase tracking-[0.15em]">{data.category}</span>
             {data.year && <span>{data.year}</span>}
           </div>
-          <h3 class="mt-2 font-medium">{data.title}</h3>
+          <h3 class="mt-4 text-lg font-bold tracking-tight">{data.title}</h3>
           <p class="mt-1 text-sm leading-relaxed text-muted">{data.detail}</p>
         </li>
       ))

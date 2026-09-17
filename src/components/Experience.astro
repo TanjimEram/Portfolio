@@ -3,11 +3,16 @@ import { getCollection } from 'astro:content';
 import ExperienceItem from './ExperienceItem.astro';
 import Section from './Section.astro';
 
+interface Props {
+  number?: number;
+}
+const { number } = Astro.props;
+
 const entries = (await getCollection('experience')).sort((a, b) => a.data.order - b.data.order);
 ---
 
-<Section id="experience" title="Experience & Leadership">
-  <ol class="space-y-10">
+<Section id="experience" title="Experience & Leadership" label="Experience" number={number} wide>
+  <ol class="grid gap-5 lg:grid-cols-2" data-reveal-group>
     {entries.map((entry) => <ExperienceItem entry={entry} />)}
   </ol>
 </Section>

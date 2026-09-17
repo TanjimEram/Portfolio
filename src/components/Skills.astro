@@ -2,19 +2,23 @@
 import { siteConfig } from '../site.config';
 import Section from './Section.astro';
 
+interface Props {
+  number?: number;
+}
+const { number } = Astro.props;
 const groups = Object.entries(siteConfig.skills);
 ---
 
-<Section id="skills" title="Skills">
-  <dl class="grid gap-6 sm:grid-cols-3">
+<Section id="skills" title="Skills" number={number} wide>
+  <dl class="grid gap-5 sm:grid-cols-3" data-reveal-group>
     {
       groups.map(([group, items]) => (
-        <div>
-          <dt class="font-mono text-xs uppercase tracking-wide text-muted">{group}</dt>
-          <dd class="mt-2">
-            <ul class="space-y-1 text-sm">
+        <div class="card p-6" data-reveal>
+          <dt class="label-mono">{group}</dt>
+          <dd class="mt-4">
+            <ul class="flex flex-wrap gap-2">
               {items.map((item) => (
-                <li>{item}</li>
+                <li class="rounded-full border border-border bg-surface-2 px-3 py-1 text-sm">{item}</li>
               ))}
             </ul>
           </dd>

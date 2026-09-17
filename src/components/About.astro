@@ -2,36 +2,41 @@
 import { siteConfig } from '../site.config';
 import Section from './Section.astro';
 
+interface Props {
+  number?: number;
+}
+const { number } = Astro.props;
 const { about, education, location } = siteConfig;
 ---
 
-<Section id="about" title="About">
-  <div class="max-w-prose space-y-4 leading-relaxed">
-    {about.map((sentence) => <p>{sentence}</p>)}
-  </div>
+<Section id="about" title="About" number={number} wide>
+  <div class="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:gap-16">
+    <div class="max-w-[46ch] space-y-5 text-muted" data-reveal-group>
+      {about.map((sentence) => <p data-reveal>{sentence}</p>)}
+    </div>
 
-  <dl class="mt-8 grid gap-x-8 gap-y-3 text-sm sm:grid-cols-[auto_1fr]">
-    {
-      education.length > 0 && (
-        <>
-          <dt class="font-mono text-xs uppercase tracking-wide text-muted sm:pt-0.5">Education</dt>
-          <dd>
-            <ul class="space-y-2">
-              {education.map((e) => (
-                <li>
-                  <span>{e.degree}</span>
-                  <span class="text-muted"> · {e.institution}</span>
-                  <span class="block text-muted sm:inline sm:before:content-['_·_']">
-                    {e.start}–{e.end ?? 'present'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </dd>
-        </>
-      )
-    }
-    <dt class="font-mono text-xs uppercase tracking-wide text-muted sm:pt-0.5">Based in</dt>
-    <dd>{location}</dd>
-  </dl>
+    <dl class="grid gap-x-8 gap-y-5 self-start text-sm sm:grid-cols-[auto_1fr] lg:grid-cols-1" data-reveal>
+      {
+        education.length > 0 && (
+          <>
+            <dt class="label-mono">Education</dt>
+            <dd>
+              <ul class="space-y-3">
+                {education.map((e) => (
+                  <li class="border-l border-border pl-4">
+                    <span class="block font-medium">{e.degree}</span>
+                    <span class="block text-muted">
+                      {e.institution} · {e.start}–{e.end ?? 'present'}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </>
+        )
+      }
+      <dt class="label-mono">Based in</dt>
+      <dd class="border-l border-border pl-4 font-medium">{location}</dd>
+    </dl>
+  </div>
 </Section>

@@ -4,37 +4,44 @@ import type { CollectionEntry } from 'astro:content';
 
 interface Props {
   project: CollectionEntry<'projects'>;
+  /** 1-based index shown as a mono counter */
+  index: number;
 }
 
-const { project } = Astro.props;
+const { project, index } = Astro.props;
 const { title, summary, tech, live, repo, image } = project.data;
 const href = `/projects/${project.id}/`;
+const num = String(index).padStart(2, '0');
 ---
 
-<article class="group relative flex flex-col rounded border border-border bg-surface transition-colors hover:border-accent">
+<article class="card group flex flex-col" data-reveal>
   {
     image && (
       <Image
         src={image}
         alt=""
-        widths={[400, 800]}
-        sizes="(min-width: 640px) 50vw, 100vw"
-        class="aspect-video w-full rounded-t object-cover"
+        widths={[480, 800, 1000]}
+        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+        class="aspect-[16/10] w-full object-cover"
       />
     )
   }
-  <div class="flex flex-1 flex-col p-5">
-    <h3 class="font-medium">
+  <div class="flex flex-1 flex-col p-6">
+    <div class="flex items-center justify-between font-mono text-xs text-muted">
+      <span>{num}</span>
+      {tech[0] && <span class="uppercase tracking-[0.15em]">{tech[0]}</span>}
+    </div>
+    <h3 class="mt-4 text-xl font-bold tracking-tight">
       {/* Stretched link: the whole card is clickable; other links sit above it via z-10 */}
-      <a href={href} class="after:absolute after:inset-0 after:rounded group-hover:text-accent" transition:name={`project-title-${project.id}`}>
+      <a href={href} class="after:absolute after:inset-0 group-hover:text-accent-ink" transition:name={`project-title-${project.id}`}>
         {title}
       </a>
     </h3>
     <p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{summary}</p>
     {
-      tech.length > 0 && (
-        <ul class="mt-4 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted" aria-label="Technologies">
-          {tech.map((t) => (
+      tech.length > 1 && (
+        <ul class="mt-5 flex flex-wrap gap-x-3 gap-y-1 font-mono text-xs text-muted" aria-label="Technologies">
+          {tech.slice(1).map((t) => (
             <li>{t}</li>
           ))}
         </ul>
@@ -42,17 +49,17 @@ const href = `/projects/${project.id}/`;
     }
     {
       (live || repo) && (
-        <ul class="relative z-10 mt-3 flex gap-4 text-sm">
+        <ul class="relative z-10 mt-4 flex gap-4 text-sm font-medium">
           {live && (
             <li>
-              <a href={live} class="inline-block py-1 text-accent hover:underline" target="_blank" rel="noopener">
+              <a href={live} class="inline-block py-1 text-accent-ink hover:underline" target="_blank" rel="noopener">
                 Live ↗
               </a>
             </li>
           )}
           {repo && (
             <li>
-              <a href={repo} class="inline-block py-1 text-accent hover:underline" target="_blank" rel="noopener">
+              <a href={repo} class="inline-block py-1 text-accent-ink hover:underline" target="_blank" rel="noopener">
                 Source ↗
               </a>
             </li>

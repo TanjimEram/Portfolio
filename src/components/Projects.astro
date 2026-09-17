@@ -3,16 +3,31 @@ import { getCollection } from 'astro:content';
 import ProjectCard from './ProjectCard.astro';
 import Section from './Section.astro';
 
+interface Props {
+  number?: number;
+}
+const { number } = Astro.props;
+
 const all = await getCollection('projects');
 const featured = all.filter((p) => p.data.featured);
 // Until something is marked featured, show everything so the section isn't empty.
 const shown = (featured.length > 0 ? featured : all).sort(
   (a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title),
 );
+const total = String(shown.length).padStart(2, '0');
 ---
 
-<Section id="projects" title={featured.length > 0 ? 'Featured projects' : 'Projects'}>
-  <div class="grid gap-4 sm:grid-cols-2">
-    {shown.map((project) => <ProjectCard project={project} />)}
+<Section id="projects" title={featured.length > 0 ? 'Featured projects' : 'Projects'} label="Work" number={number} wide>
+  {/* Slider-style counter: "01 ———— 0N" */}
+  <div class="mb-6 flex items-center gap-4 font-mono text-xs text-muted" aria-hidden="true" data-reveal>
+    <span>01</span>
+    <span class="relative h-px flex-1 bg-border">
+      <span class="absolute inset-y-0 left-0 bg-accent transition-colors duration-500" style={`width: ${100 / shown.length}%`}></span>
+    </span>
+    <span>{total}</span>
+  </div>
+
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+    {shown.map((project, i) => <ProjectCard project={project} index={i + 1} />)}
   </div>
 </Section>

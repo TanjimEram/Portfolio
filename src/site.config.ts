@@ -27,6 +27,19 @@ export interface SiteConfig {
     github: string;
     linkedin: string;
   };
+  /** Hero copy */
+  hero: {
+    /** Small mono label above the name */
+    eyebrow: string;
+    /** Filename inside src/assets (e.g. "portrait.jpg"); omit for the placeholder silhouette */
+    portrait?: string;
+    portraitAlt: string;
+    cta: { label: string; href: string };
+  };
+
+  /** Numbers worth showing. Rendered with a count-up; value is the final number */
+  stats: { value: number; suffix?: string; label: string }[];
+
   /** Path under /public */
   resume: string;
   /** Filename offered when the resume is downloaded */
@@ -85,6 +98,19 @@ export const siteConfig: SiteConfig = {
     github: 'https://github.com/TanjimEram',
     linkedin: 'https://www.linkedin.com/in/tanjim-mustak-eram-1a1429181/',
   },
+  hero: {
+    eyebrow: 'Portfolio · Dhaka, Bangladesh',
+    // portrait: 'portrait.jpg',
+    portraitAlt: 'Portrait of Tanjim Mustak Eram',
+    cta: { label: 'View projects', href: '#projects' },
+  },
+
+  stats: [
+    { value: 2000, suffix: '+', label: 'Orders fulfilled at XeroHour' },
+    { value: 5600, suffix: '+', label: 'Followers grown' },
+    { value: 50, suffix: '+', label: 'Art competition podiums' },
+  ],
+
   resume: '/resume.pdf',
   resumeFilename: 'Tanjim-Mustak-Eram-Resume.pdf',
 

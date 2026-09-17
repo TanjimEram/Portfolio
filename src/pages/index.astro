@@ -10,7 +10,8 @@ import Contact from '../components/Contact.astro';
 import { siteConfig, type SectionId } from '../site.config';
 
 // Sections render in the order set in site.config.ts; disabled ones are skipped.
-const sections: Record<SectionId, typeof Hero> = {
+// Every section except the hero receives its 1-based number for the "01 / 02 …" labels.
+const sections: Record<SectionId, typeof About> = {
   hero: Hero,
   about: About,
   projects: Projects,
@@ -21,13 +22,15 @@ const sections: Record<SectionId, typeof Hero> = {
 };
 
 const enabled = siteConfig.sections.filter((s) => s.enabled).map((s) => s.id);
+const numbered = enabled.filter((id) => id !== 'hero');
 ---
 
 <BaseLayout>
   {
     enabled.map((id) => {
       const Section = sections[id];
-      return <Section />;
+      const number = id === 'hero' ? undefined : numbered.indexOf(id) + 1;
+      return <Section number={number} />;
     })
   }
 </BaseLayout>

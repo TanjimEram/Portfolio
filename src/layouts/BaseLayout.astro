@@ -1,9 +1,12 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import { Font } from 'astro:assets';
 import '../styles/global.css';
 import { siteConfig } from '../site.config';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import BackgroundFX from '../components/BackgroundFX.astro';
+import DevAccentSwitcher from '../components/DevAccentSwitcher.astro';
 import { accentSet } from '../lib/color';
 
 interface Props {
@@ -30,14 +33,15 @@ const pageTitle = title ? `${title} — ${siteConfig.seo.title}` : siteConfig.se
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const ogImageUrl = new URL(ogImage, Astro.site).href;
 
-// Chameleon: expose the page accent (contrast-corrected per theme) plus a subtle bg tint.
+// Chameleon: expose the page accent (raw for fills, contrast-corrected "ink" for text) plus a subtle bg tint.
 // The <html> style is swapped by ClientRouter on navigation, so leaving the page restores red.
 let rootStyle: string | undefined;
 if (accent) {
   const a = accentSet(accent);
   rootStyle =
-    `--accent-dark: ${a.dark}; --accent-dark-contrast: ${a.darkContrast}; ` +
-    `--accent-light: ${a.light}; --accent-light-contrast: ${a.lightContrast}; --bg-tint: 5%;`;
+    `--accent-dark: ${a.dark}; --accent-dark-ink: ${a.darkInk}; --accent-dark-contrast: ${a.darkContrast}; ` +
+    `--accent-light: ${a.light}; --accent-light-ink: ${a.lightInk}; --accent-light-contrast: ${a.lightContrast}; ` +
+    `--bg-tint: 4%;`;
 }
 ---
 
@@ -73,10 +77,13 @@ if (accent) {
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap.xml" />
     <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b0b0c" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fafafb" />
 
-    {/* Apply saved theme before first paint; re-apply after view-transition swaps. */}
+    <Font cssVariable="--font-inter" preload />
+    <Font cssVariable="--font-jetbrains-mono" />
+
+    {/* Apply saved theme before first paint; re-apply after view-transition swaps. `js` class gates the reveal styles. */}
     <script is:inline>
       (function () {
         function apply() {
@@ -87,6 +94,7 @@ if (accent) {
             }
             document.documentElement.dataset.theme = t;
           } catch {}
+          document.documentElement.classList.add('js');
         }
         apply();
         document.addEventListener('astro:after-swap', apply);
@@ -95,17 +103,25 @@ if (accent) {
 
     <ClientRouter />
   </head>
-  <body class="flex min-h-dvh flex-col bg-bg text-text antialiased">
+  <body class="flex min-h-dvh flex-col text-text antialiased">
     <a
       href="#main"
       class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded focus:bg-accent focus:px-3 focus:py-2 focus:text-accent-contrast"
     >
       Skip to content
     </a>
+    <BackgroundFX />
+    <div class="scroll-progress" aria-hidden="true"></div>
     <Nav />
-    <main id="main" class="flex-1">
+    <main id="main" class="relative z-10 flex-1">
       <slot />
     </main>
     <Footer />
+    <div class="cursor-dot" aria-hidden="true"></div>
+    {import.meta.env.DEV && <DevAccentSwitcher />}
   </body>
 </html>
+
+<script>
+  import '../scripts/motion';
+</script>
