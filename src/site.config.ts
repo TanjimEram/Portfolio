@@ -85,9 +85,8 @@ export interface SiteConfig {
     end?: string;
   }[];
 
-  /** Feature flags for optional modules. Keep false until the module exists. */
+  /** Feature flags reserved for later modules. Keep false until the module exists. */
   features: {
-    synthHover: boolean;
     doodles: boolean;
     easterEggs: boolean;
     caseFile: boolean;
@@ -96,7 +95,7 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  name: 'Tanjim Mustak Eram',
+  name: 'Tanjim Eram',
   role: 'CSE undergraduate at North South University (3rd year): web developer & designer',
   email: 'eramtanjim@gmail.com',
   location: 'Dhaka, Bangladesh',
@@ -107,7 +106,7 @@ export const siteConfig: SiteConfig = {
   hero: {
     eyebrow: 'Portfolio · Dhaka, Bangladesh',
     // portrait: 'portrait.jpg',
-    portraitAlt: 'Portrait of Tanjim Mustak Eram',
+    portraitAlt: 'Portrait of Tanjim Eram',
     cta: { label: 'View projects', href: '#projects' },
   },
 
@@ -118,10 +117,10 @@ export const siteConfig: SiteConfig = {
   ],
 
   resume: '/resume.pdf',
-  resumeFilename: 'Tanjim-Mustak-Eram-Resume.pdf',
+  resumeFilename: 'Tanjim-Eram-Resume.pdf',
 
   seo: {
-    title: 'Tanjim Mustak Eram',
+    title: 'Tanjim Eram',
     description: 'Web developer & designer. CSE undergraduate at North South University, Dhaka.',
     url: '',
     lang: 'en',
@@ -167,8 +166,6 @@ export const siteConfig: SiteConfig = {
   ],
 
   features: {
-    /** Hover/click sound layer (src/lib/audio.ts). Off for visitors until they toggle it on. */
-    synthHover: true,
     doodles: false,
     easterEggs: false,
     caseFile: false,

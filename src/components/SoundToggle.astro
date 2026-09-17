@@ -1,9 +1,8 @@
 ---
 /**
- * Speaker toggle for the optional sound layer (site.config `features.synthHover`).
- * Off by default; the choice persists in localStorage. With prefers-reduced-motion the saved
- * "on" is not auto-applied on load — the visitor has to switch it on each visit.
- * The sound module itself (src/scripts/sound.ts) is only imported once sound is turned on.
+ * Speaker toggle for the sound layer. Sound is ON by default; muting persists in localStorage.
+ * The sound module (src/scripts/sound.ts) is imported on load unless the visitor has muted.
+ * Browsers only allow audio after a gesture, so the first note plays after the first click/keypress.
  */
 ---
 
@@ -11,8 +10,8 @@
   type="button"
   data-sound-toggle
   class="sound-toggle inline-flex size-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-text"
-  aria-pressed="false"
-  aria-label="Sound off"
+  aria-pressed="true"
+  aria-label="Sound on"
   title="Toggle sound"
 >
   <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -62,16 +61,20 @@
 <script>
   const KEY = 'sound';
   const TOAST_KEY = 'sound-toast';
-  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const stored = () => {
+  const read = (k: string) => {
     try {
-      return localStorage.getItem(KEY) === 'on';
+      return localStorage.getItem(k);
     } catch {
-      return false;
+      return null;
     }
   };
+  const write = (k: string, v: string) => {
+    try {
+      localStorage.setItem(k, v);
+    } catch {}
+  };
 
-  let on = false;
+  let on = read(KEY) !== 'off';
   let mod: typeof import('../scripts/sound') | undefined;
 
   const paint = () => {
@@ -91,33 +94,36 @@
     setTimeout(() => el.remove(), 3200);
   };
 
-  const apply = async (next: boolean, fromGesture: boolean) => {
+  const apply = async (next: boolean) => {
     on = next;
     paint();
-    try {
-      localStorage.setItem(KEY, on ? 'on' : 'off');
-    } catch {}
+    write(KEY, on ? 'on' : 'off');
     if (!on) {
       mod?.setEnabled(false);
       return;
     }
     mod ??= await import('../scripts/sound');
     mod.setEnabled(true);
-    if (fromGesture) {
-      try {
-        if (!localStorage.getItem(TOAST_KEY)) {
-          localStorage.setItem(TOAST_KEY, '1');
-          toast('Sound on — hover the projects.');
-        }
-      } catch {}
-    }
   };
 
-  // Restore a saved "on" — but never auto-enable for reduced-motion users.
-  if (stored() && !reduced) void apply(true, false);
+  paint();
+  if (on) void apply(true);
+
+  // One-time hint, shown at the first gesture (which is also what unlocks audio)
+  if (!read(TOAST_KEY)) {
+    document.addEventListener(
+      'pointerdown',
+      () => {
+        if (!on) return;
+        write(TOAST_KEY, '1');
+        toast('Sound on — hover the projects. Mute with the speaker icon.');
+      },
+      { once: true },
+    );
+  }
 
   document.addEventListener('click', (e) => {
-    if ((e.target as Element).closest('[data-sound-toggle]')) void apply(!on, true);
+    if ((e.target as Element).closest('[data-sound-toggle]')) void apply(!on);
   });
   document.addEventListener('astro:page-load', paint);
 </script>

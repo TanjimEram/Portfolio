@@ -4,7 +4,7 @@
  *
  *  - hover a project card → its own pentatonic note (index-based)
  *  - click a project card → 3-note arpeggio, then navigate
- *  - nav links / buttons → quiet high tick
+ *  - any other click → quiet high tick
  *  - one note per 80 ms; touch devices get tap sounds only
  */
 import { navigate } from 'astro:transitions/client';
@@ -66,9 +66,8 @@ document.addEventListener(
       setTimeout(() => navigate(link.href), 180);
       return;
     }
-    if (t.closest('header a, header button, .btn-solid, .btn-outline, .btn-circle, button')) {
-      throttled(() => synth.tick());
-    }
+    // every other click, anywhere, gets the quiet tick
+    throttled(() => synth.tick());
   },
   true,
 );

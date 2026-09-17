@@ -52,7 +52,7 @@ public/
 ```
 - **Nothing personal is hardcoded in components.** All text/links come from `site.config.ts` or content collections.
 - Sections render in the order listed in `site.config.ts` and can be turned off with flags.
-- Feature flags reserved for later modules (keep `false`): `synthHover`, `doodles`, `easterEggs`, `caseFile`, `terminalView`.
+- Feature flags reserved for later modules (keep `false`): `doodles`, `easterEggs`, `caseFile`, `terminalView`. (The hover/click sound layer is built in and always on; visitors mute it with the nav toggle.)
 
 ## Content schemas
 **projects**: `title, summary, description, tech[], repo?, live?, image?, color?, featured (bool), order, source ("github" | "manual")`

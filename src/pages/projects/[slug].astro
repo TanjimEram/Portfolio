@@ -163,7 +163,7 @@ const liveHost = live ? new URL(live).host : undefined;
       (prev || next) && (
         <nav class="mt-16 grid gap-4 sm:mt-24 sm:grid-cols-2" aria-label="More projects" data-reveal>
           {prev ? (
-            <a href={`/projects/${prev.id}/`} class="card group p-6">
+            <a href={`/projects/${prev.id}/`} class="card group p-6" data-sound-note={index - 2}>
               <span class="label-mono">← Previous</span>
               <span class="mt-3 block text-lg font-bold tracking-tight group-hover:text-accent-ink">{prev.data.title}</span>
             </a>
@@ -171,7 +171,7 @@ const liveHost = live ? new URL(live).host : undefined;
             <span />
           )}
           {next && (
-            <a href={`/projects/${next.id}/`} class="card group p-6 sm:text-right">
+            <a href={`/projects/${next.id}/`} class="card group p-6 sm:text-right" data-sound-note={index}>
               <span class="label-mono">Next →</span>
               <span class="mt-3 block text-lg font-bold tracking-tight group-hover:text-accent-ink">{next.data.title}</span>
             </a>

@@ -44,7 +44,7 @@ Node **22.12+** is required (see `engines` in `package.json`).
 | `sections`           | Home-page section **order**; set `enabled: false` to hide one                                |
 | `pattern`, `sectionPatterns` | Site background pattern, and optional per-section overrides                         |
 | `about`, `skills`, `education` | Plain copy and grouped lists                                                       |
-| `features`           | Optional modules. `synthHover` = hover/click sound layer (visitor-toggled, off by default)   |
+| `features`           | Flags reserved for later modules — keep `false` unless the module exists                     |
 
 Then:
 
@@ -115,9 +115,9 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   theme and can transition. Set the site default with `pattern`, a per-page one with a project's `pattern`
   frontmatter (pages cross-fade between patterns during navigation), or per-section with `sectionPatterns`.
   Compare them all at `/dev/patterns` while running `npm run dev` (not built in production).
-- **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`, flag `features.synthHover`): a ~2 KB Web Audio synth,
-  D-major pentatonic. Off by default; a speaker toggle in the nav turns it on and persists the choice. The module
-  is only downloaded once a visitor enables it, and reduced-motion users are never auto-enabled.
+- **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic. Hovering a
+  project card plays its note, clicking a card plays a short arpeggio, any other click ticks. On by default (browsers
+  hold audio until the first click); the speaker toggle in the nav mutes and the choice persists.
 - **Motion** (`src/scripts/motion.ts`): scroll reveal, progress bar, count-up, cursor dot. Everything
   respects `prefers-reduced-motion`; with it on, the page renders in its final state.
 - **Fonts:** Inter and JetBrains Mono are self-hosted at build time through Astro's Fonts API
