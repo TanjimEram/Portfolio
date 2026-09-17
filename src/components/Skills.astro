@@ -1,0 +1,25 @@
+---
+import { siteConfig } from '../site.config';
+import Section from './Section.astro';
+
+const groups = Object.entries(siteConfig.skills);
+---
+
+<Section id="skills" title="Skills">
+  <dl class="grid gap-6 sm:grid-cols-3">
+    {
+      groups.map(([group, items]) => (
+        <div>
+          <dt class="font-mono text-xs uppercase tracking-wide text-muted">{group}</dt>
+          <dd class="mt-2">
+            <ul class="space-y-1 text-sm">
+              {items.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+</Section>

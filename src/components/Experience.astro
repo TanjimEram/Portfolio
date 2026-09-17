@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import ExperienceItem from './ExperienceItem.astro';
+import Section from './Section.astro';
+
+const entries = (await getCollection('experience')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<Section id="experience" title="Experience & Leadership">
+  <ol class="space-y-10">
+    {entries.map((entry) => <ExperienceItem entry={entry} />)}
+  </ol>
+</Section>

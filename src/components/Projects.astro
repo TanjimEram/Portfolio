@@ -1,0 +1,18 @@
+---
+import { getCollection } from 'astro:content';
+import ProjectCard from './ProjectCard.astro';
+import Section from './Section.astro';
+
+const all = await getCollection('projects');
+const featured = all.filter((p) => p.data.featured);
+// Until something is marked featured, show everything so the section isn't empty.
+const shown = (featured.length > 0 ? featured : all).sort(
+  (a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title),
+);
+---
+
+<Section id="projects" title={featured.length > 0 ? 'Featured projects' : 'Projects'}>
+  <div class="grid gap-4 sm:grid-cols-2">
+    {shown.map((project) => <ProjectCard project={project} />)}
+  </div>
+</Section>

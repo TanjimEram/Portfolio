@@ -1,37 +1,33 @@
 ---
-import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
+import About from '../components/About.astro';
+import Projects from '../components/Projects.astro';
+import Experience from '../components/Experience.astro';
+import Skills from '../components/Skills.astro';
+import Achievements from '../components/Achievements.astro';
+import Contact from '../components/Contact.astro';
 import { siteConfig, type SectionId } from '../site.config';
 
-const enabled = siteConfig.sections.filter((s) => s.enabled).map((s) => s.id);
-
-// Placeholder counts until each section component is built.
-const projects = await getCollection('projects');
-const experience = await getCollection('experience');
-const achievements = await getCollection('achievements');
-
-const placeholder: Record<Exclude<SectionId, 'hero'>, { title: string; note: string }> = {
-  about: { title: 'About', note: siteConfig.about.join(' ') },
-  projects: { title: 'Projects', note: `${projects.length} project(s) in the collection.` },
-  experience: { title: 'Experience & Leadership', note: `${experience.length} entr(y/ies) in the collection.` },
-  skills: { title: 'Skills', note: Object.keys(siteConfig.skills).join(' · ') },
-  achievements: { title: 'Achievements', note: `${achievements.length} entr(y/ies) in the collection.` },
-  contact: { title: 'Contact', note: siteConfig.email },
+// Sections render in the order set in site.config.ts; disabled ones are skipped.
+const sections: Record<SectionId, typeof Hero> = {
+  hero: Hero,
+  about: About,
+  projects: Projects,
+  experience: Experience,
+  skills: Skills,
+  achievements: Achievements,
+  contact: Contact,
 };
+
+const enabled = siteConfig.sections.filter((s) => s.enabled).map((s) => s.id);
 ---
 
 <BaseLayout>
   {
-    enabled.map((id) =>
-      id === 'hero' ? (
-        <Hero />
-      ) : (
-        <section id={id} class="container-narrow border-t border-border py-14">
-          <h2 class="text-xl font-semibold tracking-tight">{placeholder[id].title}</h2>
-          <p class="mt-3 text-muted">{placeholder[id].note}</p>
-        </section>
-      ),
-    )
+    enabled.map((id) => {
+      const Section = sections[id];
+      return <Section />;
+    })
   }
 </BaseLayout>
