@@ -8,6 +8,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundFX from '../components/BackgroundFX.astro';
 import DevAccentSwitcher from '../components/DevAccentSwitcher.astro';
 import { accentSet } from '../lib/color';
+import { patternVars, type PatternName } from '../lib/patterns';
 
 interface Props {
   title?: string;
@@ -18,6 +19,8 @@ interface Props {
   ogImage?: string;
   /** Keep out of search results (404, drafts) */
   noindex?: boolean;
+  /** Background pattern for this page; defaults to site.config `pattern` */
+  pattern?: PatternName;
 }
 
 const {
@@ -26,6 +29,7 @@ const {
   accent,
   ogImage = siteConfig.seo.ogImage,
   noindex = false,
+  pattern = siteConfig.pattern,
 } = Astro.props;
 
 const pageTitle = title ? `${title} — ${siteConfig.seo.title}` : siteConfig.seo.title;
@@ -35,13 +39,14 @@ const ogImageUrl = new URL(ogImage, Astro.site).href;
 
 // Chameleon: expose the page accent (raw for fills, contrast-corrected "ink" for text) plus a subtle bg tint.
 // The <html> style is swapped by ClientRouter on navigation, so leaving the page restores red.
-let rootStyle: string | undefined;
+// The pattern travels the same way (BackgroundFX cross-fades when these change).
+let rootStyle = patternVars(pattern);
 if (accent) {
   const a = accentSet(accent);
-  rootStyle =
-    `--accent-dark: ${a.dark}; --accent-dark-ink: ${a.darkInk}; --accent-dark-contrast: ${a.darkContrast}; ` +
-    `--accent-light: ${a.light}; --accent-light-ink: ${a.lightInk}; --accent-light-contrast: ${a.lightContrast}; ` +
-    `--bg-tint: 4%;`;
+  rootStyle +=
+    ` --accent-dark: ${a.dark}; --accent-dark-ink: ${a.darkInk}; --accent-dark-contrast: ${a.darkContrast};` +
+    ` --accent-light: ${a.light}; --accent-light-ink: ${a.lightInk}; --accent-light-contrast: ${a.lightContrast};` +
+    ` --bg-tint: 4%;`;
 }
 ---
 

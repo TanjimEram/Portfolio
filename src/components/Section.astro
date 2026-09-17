@@ -1,7 +1,11 @@
 ---
+import { patternVars, type PatternName } from '../lib/patterns';
+
 interface Props {
   id: string;
   title: string;
+  /** Optional pattern drawn inside this section (site.config `sectionPatterns`) */
+  pattern?: PatternName;
   /** 1-based position among enabled sections; shown as "01" in the label */
   number?: number;
   /** Short mono label; defaults to the title */
@@ -10,11 +14,12 @@ interface Props {
   wide?: boolean;
 }
 
-const { id, title, number, label = title, wide = false } = Astro.props;
+const { id, title, number, label = title, wide = false, pattern } = Astro.props;
 const num = number !== undefined ? String(number).padStart(2, '0') : undefined;
 ---
 
-<section id={id} class:list={[wide ? 'container-wide' : 'container-narrow', 'scroll-mt-16 py-16 sm:py-24']}>
+<section id={id} class:list={[wide ? 'container-wide' : 'container-narrow', 'relative scroll-mt-16 py-16 sm:py-24']}>
+  {pattern && <div class="section-pattern" aria-hidden="true" style={patternVars(pattern)} />}
   <header class="mb-8 sm:mb-10" data-reveal>
     <p class="label-mono flex items-center gap-3">
       {num && <span>{num}</span>}

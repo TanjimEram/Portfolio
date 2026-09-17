@@ -2,6 +2,7 @@
  * Single source of truth for everything personal on the site.
  * Components must read from here (or from content collections) — never hardcode.
  */
+import type { PatternName } from './lib/patterns';
 
 export type SectionId =
   | 'hero'
@@ -63,6 +64,11 @@ export interface SiteConfig {
 
   /** Home page sections render in this order; set `enabled: false` to hide one */
   sections: { id: SectionId; enabled: boolean }[];
+
+  /** Site-wide background pattern (see src/lib/patterns.ts). Projects can override it per page. */
+  pattern: PatternName;
+  /** Optional per-section pattern, drawn inside that section on top of the site pattern */
+  sectionPatterns?: Partial<Record<SectionId, PatternName>>;
 
   /** About: 3–4 plain sentences, one per array item */
   about: string[];
@@ -138,6 +144,9 @@ export const siteConfig: SiteConfig = {
     { id: 'achievements', enabled: true },
     { id: 'contact', enabled: true },
   ],
+
+  pattern: 'halftone',
+  sectionPatterns: {},
 
   // TODO: replace placeholder copy
   about: [

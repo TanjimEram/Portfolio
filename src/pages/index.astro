@@ -30,7 +30,7 @@ const numbered = enabled.filter((id) => id !== 'hero');
     enabled.map((id) => {
       const Section = sections[id];
       const number = id === 'hero' ? undefined : numbered.indexOf(id) + 1;
-      return <Section number={number} />;
+      return <Section number={number} pattern={siteConfig.sectionPatterns?.[id]} />;
     })
   }
 </BaseLayout>

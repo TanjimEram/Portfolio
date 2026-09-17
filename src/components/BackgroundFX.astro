@@ -1,19 +1,16 @@
 ---
 /**
  * Fixed, non-interactive background stack (bottom → top):
- *   1. halftone: accent-coloured dots on a 45° grid, masked so it's dense in the top-right / bottom-left
- *      corners and absent behind the content column
+ *   1. pattern: two accent-coloured layers (A/B) so a page-to-page pattern change can cross-fade;
+ *      both sit under a density mask that keeps the pattern in the top-right / bottom-left corners
+ *      and away from the content column
  *   2. glow: a large soft accent radial behind the hero, drifting slowly
  *   3. grain: SVG feTurbulence noise
- * Everything is CSS/SVG and reads --color-accent, so the project colour shift recolours it.
+ * Which pattern shows comes from --pattern-image / --pattern-size / --pattern-rotate on <html>
+ * (BaseLayout writes them from site.config or the project's frontmatter, see src/lib/patterns.ts).
  * Colour comes from `background-color` + `mask-image` (not gradients) so it can transition.
+ * The element is persisted across view transitions; the script below swaps patterns with a fade.
  */
-
-// One 14×14 tile = a 10px grid rotated 45°: a dot in the centre and a quarter-dot in each corner.
-const dotTile =
-  `<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 14 14'>` +
-  `<circle cx='7' cy='7' r='1.6'/><circle cx='0' cy='0' r='1.6'/><circle cx='14' cy='0' r='1.6'/>` +
-  `<circle cx='0' cy='14' r='1.6'/><circle cx='14' cy='14' r='1.6'/></svg>`;
 
 const grainTile =
   `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'>` +
@@ -21,16 +18,19 @@ const grainTile =
   `<feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter>` +
   `<rect width='100%' height='100%' filter='url(#n)'/></svg>`;
 
-const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
 ---
 
-<div class="fx" aria-hidden="true" transition:persist="background-fx">
-  <div class="fx-halftone"><div class="fx-dots"></div></div>
+<div class="fx" aria-hidden="true" transition:persist="background-fx" data-fx>
+  <div class="fx-mask">
+    <div class="fx-pattern is-active" data-layer="a"></div>
+    <div class="fx-pattern" data-layer="b"></div>
+  </div>
   <div class="fx-glow"></div>
   <div class="fx-grain"></div>
 </div>
 
-<style define:vars={{ dots: uri(dotTile), grain: uri(grainTile) }}>
+<style define:vars={{ grain }}>
   .fx {
     position: fixed;
     inset: 0;
@@ -44,8 +44,8 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
     inset: 0;
   }
 
-  /* 1. density mask: strong in the top-right and bottom-left, nothing in the middle band where copy sits */
-  .fx-halftone {
+  /* density mask: strong in the top-right and bottom-left, nothing in the middle band where copy sits */
+  .fx-mask {
     mask-image:
       radial-gradient(60vmax 60vmax at 100% 0%, #000 0%, rgba(0, 0, 0, 0.55) 30%, transparent 62%),
       radial-gradient(55vmax 55vmax at 0% 100%, #000 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
@@ -53,19 +53,27 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
       radial-gradient(60vmax 60vmax at 100% 0%, #000 0%, rgba(0, 0, 0, 0.55) 30%, transparent 62%),
       radial-gradient(55vmax 55vmax at 0% 100%, #000 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
   }
-  .fx-dots {
+
+  /* Pattern layers. Oversized so a rotated layer still covers the viewport. Without JS, layer A simply
+     tracks the <html> variables; the script freezes each layer's pattern so changes can cross-fade. */
+  .fx-pattern {
+    position: absolute;
+    inset: -30%;
     background-color: var(--color-accent);
-    opacity: var(--fx-pattern);
-    mask-image: var(--dots);
-    -webkit-mask-image: var(--dots);
-    mask-size: 14px 14px;
-    -webkit-mask-size: 14px 14px;
+    opacity: 0;
+    mask-image: var(--layer-image, var(--pattern-image));
+    -webkit-mask-image: var(--layer-image, var(--pattern-image));
+    mask-size: var(--layer-size, var(--pattern-size));
+    -webkit-mask-size: var(--layer-size, var(--pattern-size));
+    transform: rotate(var(--layer-rotate, var(--pattern-rotate, 0deg)));
     transition:
-      background-color 600ms ease,
-      opacity 600ms ease;
+      opacity 500ms ease,
+      background-color 600ms ease;
+  }
+  .fx-pattern.is-active {
+    opacity: var(--fx-pattern);
   }
 
-  /* 2. glow */
   .fx-glow {
     inset: auto;
     top: -20vmax;
@@ -97,7 +105,6 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
     }
   }
 
-  /* 3. grain */
   .fx-grain {
     background-image: var(--grain);
     background-size: 240px 240px;
@@ -105,3 +112,53 @@ const uri = (svg: string) => `url("data:image/svg+xml,${encodeURIComponent(svg)}
     mix-blend-mode: var(--fx-grain-blend);
   }
 </style>
+
+<script>
+  /**
+   * Cross-fade between pattern layers when the <html> pattern variables change
+   * (view-transition navigation, or the dev switcher firing `fx:pattern`).
+   */
+  const root = document.documentElement;
+  const read = () => {
+    const cs = getComputedStyle(root);
+    return {
+      image: cs.getPropertyValue('--pattern-image').trim(),
+      size: cs.getPropertyValue('--pattern-size').trim(),
+      rotate: cs.getPropertyValue('--pattern-rotate').trim() || '0deg',
+    };
+  };
+  const freeze = (el: HTMLElement, p: ReturnType<typeof read>) => {
+    el.style.setProperty('--layer-image', p.image);
+    el.style.setProperty('--layer-size', p.size);
+    el.style.setProperty('--layer-rotate', p.rotate);
+  };
+
+  let current = '';
+  const sync = () => {
+    const fx = document.querySelector<HTMLElement>('[data-fx]');
+    if (!fx) return;
+    const layers = fx.querySelectorAll<HTMLElement>('.fx-pattern');
+    const p = read();
+    if (!p.image) return;
+    if (!current) {
+      // first run: pin the active layer to what CSS already shows
+      const active = fx.querySelector<HTMLElement>('.fx-pattern.is-active') ?? layers[0];
+      freeze(active, p);
+      current = p.image;
+      return;
+    }
+    if (p.image === current) return;
+    const active = fx.querySelector<HTMLElement>('.fx-pattern.is-active') ?? layers[0];
+    const next = active === layers[0] ? layers[1] : layers[0];
+    freeze(next, p);
+    // force a style flush so the opacity transition runs from 0
+    void next.offsetWidth;
+    next.classList.add('is-active');
+    active.classList.remove('is-active');
+    current = p.image;
+  };
+
+  document.addEventListener('astro:page-load', sync);
+  document.addEventListener('astro:after-swap', sync);
+  document.addEventListener('fx:pattern', sync);
+</script>

@@ -363,3 +363,27 @@
     opacity: 1;
   }
 }
+
+/* Per-section pattern (site.config `sectionPatterns`): same layer recipe as BackgroundFX, faded at the edges */
+.section-pattern {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  mask-image: radial-gradient(70% 80% at 100% 50%, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 75%);
+  -webkit-mask-image: radial-gradient(70% 80% at 100% 50%, #000 0%, rgba(0, 0, 0, 0.5) 40%, transparent 75%);
+}
+.section-pattern::before {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background-color: var(--color-accent);
+  opacity: var(--fx-pattern);
+  mask-image: var(--pattern-image);
+  -webkit-mask-image: var(--pattern-image);
+  mask-size: var(--pattern-size);
+  -webkit-mask-size: var(--pattern-size);
+  transform: rotate(var(--pattern-rotate, 0deg));
+  transition: background-color 600ms ease;
+}

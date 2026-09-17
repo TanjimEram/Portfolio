@@ -29,7 +29,7 @@
   --color-border: rgba(255, 255, 255, 0.08);
 
   /* Background FX intensities (light mode lowers them) */
-  --fx-pattern: 0.14;
+  --fx-pattern: 0.1;
   --fx-glow: 0.14;
   --fx-grain: 0.03;
   --fx-grain-blend: screen;

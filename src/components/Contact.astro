@@ -2,14 +2,17 @@
 import { siteConfig } from '../site.config';
 import Section from './Section.astro';
 
+import type { PatternName } from '../lib/patterns';
+
 interface Props {
   number?: number;
+  pattern?: PatternName;
 }
-const { number } = Astro.props;
+const { number, pattern } = Astro.props;
 const { email, links, resume, resumeFilename } = siteConfig;
 ---
 
-<Section id="contact" title="Get in touch" label="Contact" number={number} wide>
+<Section id="contact" title="Get in touch" label="Contact" number={number} pattern={pattern} wide>
   <div class="card p-7 sm:p-10" data-reveal>
     <p class="max-w-[46ch] text-muted">Email is the quickest way to reach me.</p>
     <a

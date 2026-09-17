@@ -42,6 +42,7 @@ Node **22.12+** is required (see `engines` in `package.json`).
 | `seo`                | Title, description, canonical `url`, OG image, locale                                        |
 | `nav`                | Header links                                                                                 |
 | `sections`           | Home-page section **order**; set `enabled: false` to hide one                                |
+| `pattern`, `sectionPatterns` | Site background pattern, and optional per-section overrides                         |
 | `about`, `skills`, `education` | Plain copy and grouped lists                                                       |
 | `features`           | Flags for optional modules — keep `false` unless the module exists                           |
 
@@ -72,6 +73,7 @@ repo: https://github.com/you/project     # optional
 live: https://project.example.com        # optional
 image: ./project.png                     # optional, relative to the .md file, optimised automatically
 color: '#2563eb'                         # optional hex; recolours the detail page ("chameleon")
+pattern: grid                            # optional; background pattern for the detail page (see Patterns)
 featured: true                           # featured projects show on the home page
 order: 1                                 # sort key, ascending
 source: manual                           # or "github" for drafts from fetch:github
@@ -108,6 +110,11 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   navigation, so leaving the page restores the default accent — no JS.
 - **Background** (`BackgroundFX.astro`): halftone dots, glow and grain are all CSS/SVG that read
   `--color-accent`; intensities are the `--fx-*` variables in `theme.css`.
+- **Patterns** (`src/lib/patterns.ts`): `halftone`, `weave`, `rings`, `grid`, `chevron`, `mesh`, `waves`,
+  `scatter`. Each is a seamless inline-SVG tile used as a `mask-image` over the accent, so colour follows the
+  theme and can transition. Set the site default with `pattern`, a per-page one with a project's `pattern`
+  frontmatter (pages cross-fade between patterns during navigation), or per-section with `sectionPatterns`.
+  Compare them all at `/dev/patterns` while running `npm run dev` (not built in production).
 - **Motion** (`src/scripts/motion.ts`): scroll reveal, progress bar, count-up, cursor dot. Everything
   respects `prefers-reduced-motion`; with it on, the page renders in its final state.
 - **Fonts:** Inter and JetBrains Mono are self-hosted at build time through Astro's Fonts API

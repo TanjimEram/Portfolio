@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
+import { patternNames } from './lib/patterns';
 
 const projects = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/projects' }),
@@ -18,6 +19,8 @@ const projects = defineCollection({
         .string()
         .regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'color must be a hex colour like #2563eb')
         .optional(),
+      /** Background pattern for the detail page; defaults to site.config `pattern` */
+      pattern: z.enum(patternNames).optional(),
       featured: z.boolean().default(false),
       order: z.number().default(0),
       source: z.enum(['github', 'manual']).default('manual'),

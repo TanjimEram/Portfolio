@@ -5,6 +5,7 @@ description: Designed and launched the event website for Marxcellence 2025, a na
 tech: [HTML]
 repo: https://github.com/TanjimEram/MarXcellence2025
 color: '#2563eb' # TODO: replace with the real brand colour
+pattern: grid
 # live: TODO
 # image: TODO (./marxcellence-2025-website.png)
 featured: false

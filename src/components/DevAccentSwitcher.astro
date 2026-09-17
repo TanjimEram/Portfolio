@@ -3,13 +3,25 @@
  * DEV ONLY (BaseLayout renders it when import.meta.env.DEV). Lets you preview the chameleon
  * by writing the same <html> variables a project page would. "Reset" restores the page's own accent.
  */
+import { patternNames, patterns } from '../lib/patterns';
+
 const presets = ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#0ea5e9', '#ec4899', '#111111', '#ffffff'];
+// Pre-render every pattern's variables so the client can swap without shipping the generator
+const patternOptions = patternNames.map((name) => {
+  const p = patterns[name]();
+  return { name, image: p.uri, size: `${p.width}px ${p.height}px`, rotate: `${p.rotation}deg` };
+});
 ---
 
 <div class="dev-accent" data-dev-accent aria-label="Dev accent switcher">
   <span class="label-mono" style="letter-spacing: 0.12em">accent</span>
   {presets.map((c) => <button type="button" data-accent={c} style={`background:${c}`} aria-label={`Accent ${c}`} />)}
   <input type="color" value="#e8412f" aria-label="Custom accent" />
+  <select aria-label="Background pattern" data-pattern-select>
+    <option value="">pattern…</option>
+    {patternOptions.map((p) => <option value={p.name} data-image={p.image} data-size={p.size} data-rotate={p.rotate}>{p.name}</option>)}
+  </select>
+  <a href="/dev/patterns" class="reset">all</a>
   <button type="button" data-accent="" class="reset">Reset</button>
 </div>
 
@@ -46,6 +58,15 @@ const presets = ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#0ea5e9
   .dev-accent .reset {
     color: var(--color-muted);
     padding-inline: 0.3rem;
+  }
+  .dev-accent select {
+    max-width: 6.5rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface-2);
+    color: var(--color-text);
+    padding: 0.15rem 0.4rem;
+    font: inherit;
   }
 </style>
 
@@ -84,5 +105,18 @@ const presets = ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#0ea5e9
   document.addEventListener('input', (e) => {
     const input = e.target as HTMLInputElement;
     if (input.matches('[data-dev-accent] input[type=color]')) apply(input.value);
+  });
+
+  // Pattern: write the same <html> variables BaseLayout renders, then let BackgroundFX cross-fade
+  document.addEventListener('change', (e) => {
+    const select = e.target as HTMLSelectElement;
+    if (!select.matches('[data-dev-accent] [data-pattern-select]')) return;
+    const opt = select.selectedOptions[0];
+    if (!opt?.value) return;
+    const root = document.documentElement;
+    root.style.setProperty('--pattern-image', opt.dataset.image ?? '');
+    root.style.setProperty('--pattern-size', opt.dataset.size ?? '');
+    root.style.setProperty('--pattern-rotate', opt.dataset.rotate ?? '0deg');
+    document.dispatchEvent(new CustomEvent('fx:pattern'));
   });
 </script>

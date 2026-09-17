@@ -28,7 +28,7 @@ interface Props {
 
 const { project, index, total, prev, next } = Astro.props;
 const { Content } = await render(project);
-const { title, summary, description, tech, repo, live, image, color, source } = project.data;
+const { title, summary, description, tech, repo, live, image, color, pattern, source } = project.data;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 // GitHub drafts copy the summary into description; don't print the same line twice.
@@ -37,7 +37,7 @@ const repoName = repo ? repo.replace(/^https?:\/\/(www\.)?github\.com\//, '') : 
 const liveHost = live ? new URL(live).host : undefined;
 ---
 
-<BaseLayout title={title} description={description} accent={color}>
+<BaseLayout title={title} description={description} accent={color} pattern={pattern}>
   <article class="container-wide py-10 sm:py-16">
     {/* ---- hero ---- */}
     <header class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:items-end lg:gap-14" data-reveal-group>
