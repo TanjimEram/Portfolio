@@ -15,8 +15,8 @@
 :root {
   color-scheme: dark;
 
-  --color-accent: var(--accent-dark, #ef3344); /* 4.9:1 on bg */
-  --color-accent-contrast: var(--accent-dark-contrast, #000000); /* 5.2:1 on accent */
+  --color-accent: var(--accent-dark, #f13d4d); /* 5.2:1 on bg, 4.75:1 on surface */
+  --color-accent-contrast: var(--accent-dark-contrast, #000000); /* 5.5:1 on accent */
   --color-bg: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #0a0a0a);
   --color-surface: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #161616);
   --color-text: #f5f5f5;

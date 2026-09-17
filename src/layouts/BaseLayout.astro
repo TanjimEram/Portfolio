@@ -11,11 +11,24 @@ interface Props {
   description?: string;
   /** Per-page accent override (project "chameleon"). Hex colour. */
   accent?: string;
+  /** Absolute or root-relative path to a 1200×630 image */
+  ogImage?: string;
+  /** Keep out of search results (404, drafts) */
+  noindex?: boolean;
 }
 
-const { title, description = siteConfig.seo.description, accent } = Astro.props;
+const {
+  title,
+  description = siteConfig.seo.description,
+  accent,
+  ogImage = siteConfig.seo.ogImage,
+  noindex = false,
+} = Astro.props;
+
 const pageTitle = title ? `${title} — ${siteConfig.seo.title}` : siteConfig.seo.title;
-const canonical = siteConfig.seo.url ? new URL(Astro.url.pathname, siteConfig.seo.url).href : undefined;
+// Astro.site comes from astro.config.ts (site.config url, else the Vercel production URL)
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImageUrl = new URL(ogImage, Astro.site).href;
 
 // Chameleon: expose the page accent (contrast-corrected per theme) plus a subtle bg tint.
 // The <html> style is swapped by ClientRouter on navigation, so leaving the page restores red.
@@ -36,10 +49,32 @@ if (accent) {
     <meta name="generator" content={Astro.generator} />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
-    {canonical && <link rel="canonical" href={canonical} />}
+    <meta name="author" content={siteConfig.name} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <meta property="og:type" content={title ? 'article' : 'website'} />
+    <meta property="og:site_name" content={siteConfig.seo.title} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${siteConfig.name} — ${siteConfig.role}`} />
+    <meta property="og:locale" content={siteConfig.seo.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap.xml" />
     <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0a0a0a" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
 
     {/* Apply saved theme before first paint; re-apply after view-transition swaps. */}
     <script is:inline>

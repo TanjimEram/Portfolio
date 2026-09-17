@@ -104,8 +104,9 @@ const LIGHT_BG: RGB = [255, 255, 255];
 
 export function accentSet(hex: string): AccentSet {
   const base = hexToRgb(hex);
-  const dark = ensureContrast(base, DARK_BG);
-  const light = ensureContrast(base, LIGHT_BG);
+  // Slightly above 4.5 so the colour also passes on the tinted bg and on surfaces.
+  const dark = ensureContrast(base, DARK_BG, 4.7);
+  const light = ensureContrast(base, LIGHT_BG, 4.7);
   return {
     dark: rgbToHex(dark),
     darkContrast: contrastColor(dark),

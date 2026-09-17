@@ -29,14 +29,20 @@ export interface SiteConfig {
   };
   /** Path under /public */
   resume: string;
+  /** Filename offered when the resume is downloaded */
+  resumeFilename: string;
 
   /** <head> metadata */
   seo: {
     title: string;
     description: string;
-    /** Canonical origin, no trailing slash. Set once deployed. */
+    /** Canonical origin, no trailing slash. Leave empty to use Vercel's production URL. */
     url: string;
     lang: string;
+    /** Open Graph locale, e.g. en_US */
+    locale: string;
+    /** Path under /public, 1200×630. Regenerate with scripts/make-og.ps1 */
+    ogImage: string;
   };
 
   /** Top navigation, in order */
@@ -80,12 +86,15 @@ export const siteConfig: SiteConfig = {
     linkedin: 'https://www.linkedin.com/in/tanjim-mustak-eram-1a1429181/',
   },
   resume: '/resume.pdf',
+  resumeFilename: 'Tanjim-Mustak-Eram-Resume.pdf',
 
   seo: {
     title: 'Tanjim Mustak Eram',
     description: 'Web developer & designer. CSE undergraduate at North South University, Dhaka.',
     url: '',
     lang: 'en',
+    locale: 'en_US',
+    ogImage: '/og.png',
   },
 
   nav: [
