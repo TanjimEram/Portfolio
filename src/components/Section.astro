@@ -18,7 +18,7 @@ const { id, title, number, label = title, wide = false, pattern } = Astro.props;
 const num = number !== undefined ? String(number).padStart(2, '0') : undefined;
 ---
 
-<section id={id} class:list={[wide ? 'container-wide' : 'container-narrow', 'relative scroll-mt-16 py-16 sm:py-24']}>
+<section id={id} class:list={[wide ? 'container-wide' : 'container-narrow', 'relative py-16 sm:py-24']}>
   {pattern && <div class="section-pattern" aria-hidden="true" style={patternVars(pattern)} />}
   <header class="mb-8 sm:mb-10" data-reveal>
     <p class="label-mono flex items-center gap-3">

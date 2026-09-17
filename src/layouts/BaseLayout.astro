@@ -93,7 +93,9 @@ if (accent) {
       (function () {
         function apply() {
           try {
-            var t = localStorage.getItem('theme');
+            // ?theme=light|dark forces a theme for this load (screenshots, testing) without persisting it
+            var q = new URLSearchParams(location.search).get('theme');
+            var t = q === 'light' || q === 'dark' ? q : localStorage.getItem('theme');
             if (t !== 'light' && t !== 'dark') {
               t = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
             }
@@ -122,7 +124,6 @@ if (accent) {
       <slot />
     </main>
     <Footer />
-    <div class="cursor-dot" aria-hidden="true"></div>
     {import.meta.env.DEV && <DevAccentSwitcher />}
   </body>
 </html>

@@ -99,13 +99,13 @@ const iconClass = 'size-5';
 </section>
 
 <style>
+  /* Diameter = portrait height, so it only ever bleeds sideways (off the viewport edge), never above/below */
   .portrait-disc {
     position: absolute;
-    right: -22%;
-    top: 50%;
-    width: 120%;
+    top: 0;
+    bottom: 0;
+    right: -28%;
     aspect-ratio: 1;
-    transform: translateY(-50%);
     border-radius: 9999px;
     /* colour via background-color so it transitions; the gradient only adds a soft highlight */
     background-color: var(--color-accent);
@@ -115,8 +115,7 @@ const iconClass = 'size-5';
   }
   @media (width >= 64rem) {
     .portrait-disc {
-      right: -35%;
-      width: 125%;
+      right: -38%;
     }
   }
   /* Duotone: grayscale image + accent multiply → black-to-accent */
@@ -132,7 +131,10 @@ const iconClass = 'size-5';
     position: absolute;
     inset: 0;
     background: var(--color-accent);
-    mix-blend-mode: multiply;
+    mix-blend-mode: multiply; /* dark theme: black → accent */
     transition: background-color 600ms ease;
+  }
+  :global(:root[data-theme='light']) .duotone {
+    mix-blend-mode: screen; /* light theme: accent → white, so the portrait reads light like the page */
   }
 </style>

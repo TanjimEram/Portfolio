@@ -1,14 +1,15 @@
 ---
 /**
  * Fixed, non-interactive background stack (bottom → top):
- *   1. pattern: two accent-coloured layers (A/B) so a page-to-page pattern change can cross-fade;
- *      both sit under a density mask that keeps the pattern in the top-right / bottom-left corners
- *      and away from the content column
- *   2. glow: a large soft accent radial behind the hero, drifting slowly
- *   3. grain: SVG feTurbulence noise
- * Which pattern shows comes from --pattern-image / --pattern-size / --pattern-rotate on <html>
- * (BaseLayout writes them from site.config or the project's frontmatter, see src/lib/patterns.ts).
- * Colour comes from `background-color` + `mask-image` (not gradients) so it can transition.
+ *   1. pattern: two accent-coloured layers (A/B) so a page-to-page pattern change can cross-fade.
+ *      Each layer draws the tile twice — at 1× and, underneath, at 40% size and half opacity — for depth.
+ *      A density mask keeps the pattern in the corners and outer margins and fully clear behind the
+ *      content column.
+ *   2. glow: a large soft accent radial behind the hero, drifting slowly (light theme turns it off)
+ *   3. grain: SVG feTurbulence noise, kept separate from the pattern so it never softens the dots
+ * Which pattern shows comes from --pattern-image / --pattern-size / --pattern-size-fine / --pattern-rotate
+ * on <html> (BaseLayout writes them from site.config or the project's frontmatter, see src/lib/patterns.ts).
+ * Colour comes from `background-color` + `mask-image` (vector SVG, no blur, no resampling) so it can transition.
  * The element is persisted across view transitions; the script below swaps patterns with a fade.
  */
 
@@ -23,8 +24,8 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
 
 <div class="fx" aria-hidden="true" transition:persist="background-fx" data-fx>
   <div class="fx-mask">
-    <div class="fx-pattern is-active" data-layer="a"></div>
-    <div class="fx-pattern" data-layer="b"></div>
+    <div class="fx-pattern is-active" data-layer="a"><i></i><b></b></div>
+    <div class="fx-pattern" data-layer="b"><i></i><b></b></div>
   </div>
   <div class="fx-glow"></div>
   <div class="fx-grain"></div>
@@ -44,14 +45,40 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
     inset: 0;
   }
 
-  /* density mask: strong in the top-right and bottom-left, nothing in the middle band where copy sits */
+  /*
+   * Density mask = union of:
+   *   - two tight corner radials (top-right, bottom-left) with a short falloff
+   *   - the outer margins beside the content column (only exists on wide viewports)
+   * Everything else is fully transparent, so nothing sits under text.
+   */
   .fx-mask {
+    --edge: calc(50% - (var(--content-width) / 2));
     mask-image:
-      radial-gradient(60vmax 60vmax at 100% 0%, #000 0%, rgba(0, 0, 0, 0.55) 30%, transparent 62%),
-      radial-gradient(55vmax 55vmax at 0% 100%, #000 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
+      radial-gradient(48vmax 48vmax at 100% 0%, #000 0%, #000 22%, transparent 52%),
+      radial-gradient(44vmax 44vmax at 0% 100%, #000 0%, #000 20%, transparent 50%),
+      linear-gradient(
+        90deg,
+        #000 0,
+        #000 calc(var(--edge) - 3rem),
+        transparent calc(var(--edge) - 0.5rem),
+        transparent calc(100% - var(--edge) + 0.5rem),
+        #000 calc(100% - var(--edge) + 3rem),
+        #000 100%
+      );
     -webkit-mask-image:
-      radial-gradient(60vmax 60vmax at 100% 0%, #000 0%, rgba(0, 0, 0, 0.55) 30%, transparent 62%),
-      radial-gradient(55vmax 55vmax at 0% 100%, #000 0%, rgba(0, 0, 0, 0.5) 30%, transparent 60%);
+      radial-gradient(48vmax 48vmax at 100% 0%, #000 0%, #000 22%, transparent 52%),
+      radial-gradient(44vmax 44vmax at 0% 100%, #000 0%, #000 20%, transparent 50%),
+      linear-gradient(
+        90deg,
+        #000 0,
+        #000 calc(var(--edge) - 3rem),
+        transparent calc(var(--edge) - 0.5rem),
+        transparent calc(100% - var(--edge) + 0.5rem),
+        #000 calc(100% - var(--edge) + 3rem),
+        #000 100%
+      );
+    mask-composite: add;
+    -webkit-mask-composite: source-over;
   }
 
   /* Pattern layers. Oversized so a rotated layer still covers the viewport. Without JS, layer A simply
@@ -59,19 +86,29 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
   .fx-pattern {
     position: absolute;
     inset: -30%;
-    background-color: var(--color-accent);
     opacity: 0;
+    transform: rotate(var(--layer-rotate, var(--pattern-rotate, 0deg)));
+    transition: opacity 500ms ease;
+  }
+  .fx-pattern.is-active {
+    opacity: var(--fx-pattern);
+  }
+  /* <i> = main tile at 1×, <b> = fine tile at 40% size and half opacity for depth */
+  .fx-pattern > i,
+  .fx-pattern > b {
+    position: absolute;
+    inset: 0;
+    background-color: var(--color-accent);
     mask-image: var(--layer-image, var(--pattern-image));
     -webkit-mask-image: var(--layer-image, var(--pattern-image));
     mask-size: var(--layer-size, var(--pattern-size));
     -webkit-mask-size: var(--layer-size, var(--pattern-size));
-    transform: rotate(var(--layer-rotate, var(--pattern-rotate, 0deg)));
-    transition:
-      opacity 500ms ease,
-      background-color 600ms ease;
+    transition: background-color 600ms ease;
   }
-  .fx-pattern.is-active {
-    opacity: var(--fx-pattern);
+  .fx-pattern > b {
+    mask-size: var(--layer-size-fine, var(--pattern-size-fine));
+    -webkit-mask-size: var(--layer-size-fine, var(--pattern-size-fine));
+    opacity: 0.5;
   }
 
   .fx-glow {
@@ -124,12 +161,14 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
     return {
       image: cs.getPropertyValue('--pattern-image').trim(),
       size: cs.getPropertyValue('--pattern-size').trim(),
+      fine: cs.getPropertyValue('--pattern-size-fine').trim(),
       rotate: cs.getPropertyValue('--pattern-rotate').trim() || '0deg',
     };
   };
   const freeze = (el: HTMLElement, p: ReturnType<typeof read>) => {
     el.style.setProperty('--layer-image', p.image);
     el.style.setProperty('--layer-size', p.size);
+    el.style.setProperty('--layer-size-fine', p.fine);
     el.style.setProperty('--layer-rotate', p.rotate);
   };
 

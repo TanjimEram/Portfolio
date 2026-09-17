@@ -9,8 +9,8 @@ const initials = siteConfig.name
   .join('');
 ---
 
-<header class="sticky top-0 z-40 border-b border-border bg-bg/70 backdrop-blur-md transition-colors duration-500">
-  <nav class="container-wide flex h-16 items-center justify-between" aria-label="Primary">
+<header class="sticky top-0 z-40 border-b border-border bg-bg/75 backdrop-blur-md transition-colors duration-500">
+  <nav class="container-wide flex h-[var(--header-h)] items-center justify-between" aria-label="Primary">
     <a href="/" class="inline-flex min-h-9 items-center gap-2 font-mono text-sm font-medium tracking-[0.2em] uppercase hover:text-accent-ink" aria-label={`${initials} — home`}>
       <span class="inline-block size-2 rounded-full bg-accent transition-colors duration-500" aria-hidden="true"></span>
       {initials}

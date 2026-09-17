@@ -28,14 +28,19 @@
   --color-muted: #8e8e95; /* 6.1:1 on bg, 5.2:1 on surface-2 */
   --color-border: rgba(255, 255, 255, 0.08);
 
-  /* Background FX intensities (light mode lowers them) */
-  --fx-pattern: 0.1;
+  /* Background FX intensities (light mode has its own set below) */
+  --fx-pattern: 0.16;
   --fx-glow: 0.14;
-  --fx-grain: 0.03;
+  --fx-grain: 0.02;
   --fx-grain-blend: screen;
 
+  /* Cards: glass on dark (translucent + blur), solid on light */
+  --card-bg: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  --card-blur: 14px;
   --shadow-card: 0 24px 60px -24px rgba(0, 0, 0, 0.7);
   --highlight-card: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+  --header-h: 4rem;
 
   --font-sans: var(--font-inter, 'Inter'), 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: var(--font-jetbrains-mono, 'JetBrains Mono'), 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -49,22 +54,27 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --color-accent: var(--accent-light, #e8412f);
-  --color-accent-ink: var(--accent-light-ink, #d62a18); /* ≥ 4.7:1 on white */
-  --color-accent-contrast: var(--accent-light-contrast, #ffffff);
+  /* Warm off-white palette — its own set, not an inversion */
+  --color-accent: var(--accent-light, #d6301f); /* 4.6:1 on bg, 4.9:1 on white */
+  --color-accent-ink: var(--accent-light-ink, #d6301f);
+  --color-accent-contrast: var(--accent-light-contrast, #ffffff); /* 4.9:1 on accent */
 
-  --color-bg: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #fafafb);
+  --color-bg: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #faf9f7);
   --color-surface: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #ffffff);
-  --color-surface-2: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #f1f1f3);
-  --color-text: #0b0b0c;
-  --color-muted: #5b5b63; /* 6.5:1 on bg */
-  --color-border: rgba(0, 0, 0, 0.08);
+  --color-surface-2: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #f2f0ed);
+  --color-text: #131315;
+  --color-muted: #5c5c63; /* 6.3:1 on bg, 5.8:1 on surface-2 */
+  --color-border: rgba(0, 0, 0, 0.1);
 
-  --fx-pattern: 0.06;
-  --fx-glow: 0.08;
-  --fx-grain: 0.05;
+  --fx-pattern: 0.08;
+  --fx-glow: 0; /* no glows in light: depth comes from warm shadows instead */
+  --fx-grain: 0.015;
   --fx-grain-blend: multiply;
 
-  --shadow-card: 0 24px 50px -28px rgba(0, 0, 0, 0.25);
-  --highlight-card: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --card-bg: var(--color-surface);
+  --card-blur: 0px;
+  --shadow-card:
+    0 1px 2px rgba(60, 40, 20, 0.06),
+    0 16px 40px -20px rgba(60, 40, 20, 0.22);
+  --highlight-card: inset 0 1px 0 rgba(255, 255, 255, 1);
 }

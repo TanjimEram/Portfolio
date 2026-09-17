@@ -6,7 +6,7 @@
  * (data URIs can't read CSS variables). `color` therefore only matters when a pattern is used as a
  * plain `background-image` (the /dev/patterns page, exports); for masks the default black is correct.
  *
- * Layer opacity is owned by CSS (`--fx-pattern`: 0.10 dark / 0.06 light) so it can change with the theme;
+ * Layer opacity is owned by CSS (`--fx-pattern`: 0.16 dark / 0.08 light) so it can change with the theme;
  * the `opacity` option here is baked into the SVG for one-off uses.
  *
  * Rotation is NOT baked into the tile (a rotated tile stops tiling); it is returned so the caller can
@@ -37,7 +37,7 @@ export const patternNames = ['halftone', 'weave', 'rings', 'grid', 'chevron', 'm
 export type PatternName = (typeof patternNames)[number];
 
 const svg = (w: number, h: number, body: string, o: Required<PatternOptions>) =>
-  `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>` +
+  `<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}' shape-rendering='geometricPrecision'>` +
   `<g fill='${o.color}' stroke='${o.color}' opacity='${o.opacity}'>${body}</g></svg>`;
 
 const defaults = (o: PatternOptions = {}, rotation = 0): Required<PatternOptions> => ({
@@ -54,10 +54,10 @@ const result = (w: number, h: number, body: string, o: Required<PatternOptions>)
   rotation: o.rotation,
 });
 
-/** Dot grid; rotated 45° by default so it reads as diamonds. */
+/** Dot grid (r 1.2 on 8px); rotated 45° by default so it reads as diamonds. */
 export function halftone(opts?: PatternOptions): PatternResult {
   const o = defaults(opts, 45);
-  return result(10, 10, `<circle cx='5' cy='5' r='1.6' stroke='none'/>`, o);
+  return result(8, 8, `<circle cx='4' cy='4' r='1.2' stroke='none'/>`, o);
 }
 
 /** Carbon-fibre weave: alternating blocks of ±45° hatching. */
@@ -164,12 +164,19 @@ export const patterns: Record<PatternName, (opts?: PatternOptions) => PatternRes
   scatter,
 };
 
+/** Second, finer copy of the pattern drawn under the main one for depth (fraction of the tile size) */
+export const FINE_SCALE = 0.4;
+
 /**
  * CSS custom properties for a pattern layer, ready for a `style` attribute:
- *   --pattern-image / --pattern-size / --pattern-rotate
- * BackgroundFX (and any `.pattern-layer`) reads these.
+ *   --pattern-image / --pattern-size / --pattern-size-fine / --pattern-rotate
+ * Sizes are whole CSS pixels so the tile is never resampled; SVG stays vector-crisp at any DPR.
  */
 export function patternVars(name: PatternName, opts?: PatternOptions): string {
   const p = patterns[name](opts);
-  return `--pattern-image: ${p.uri}; --pattern-size: ${p.width}px ${p.height}px; --pattern-rotate: ${p.rotation}deg;`;
+  const fine = `${Math.max(2, Math.round(p.width * FINE_SCALE))}px ${Math.max(2, Math.round(p.height * FINE_SCALE))}px`;
+  return (
+    `--pattern-image: ${p.uri}; --pattern-size: ${Math.round(p.width)}px ${Math.round(p.height)}px; ` +
+    `--pattern-size-fine: ${fine}; --pattern-rotate: ${p.rotation}deg;`
+  );
 }

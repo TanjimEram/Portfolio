@@ -1,5 +1,5 @@
 /**
- * Motion: scroll reveal, scroll progress, count-up numbers, cursor dot.
+ * Motion: scroll reveal, scroll progress, count-up numbers.
  * Everything here is gated on prefers-reduced-motion; the CSS side is gated too,
  * so with motion reduced the page simply renders in its final state.
  * Re-initialised on every ClientRouter navigation via astro:page-load.
@@ -104,38 +104,10 @@ function initCountUp() {
   nums.forEach((el) => io.observe(el));
 }
 
-/* ---- cursor dot (desktop only; the native cursor stays) ---- */
-let cursorBound = false;
-function initCursor() {
-  if (cursorBound) return;
-  if (reduced() || !matchMedia('(pointer: fine)').matches) return;
-  cursorBound = true;
-  const root = document.documentElement;
-  const dot = () => document.querySelector<HTMLElement>('.cursor-dot');
-  const interactive = 'a, button, input, select, textarea, [role="button"], [data-cursor]';
-
-  addEventListener(
-    'pointermove',
-    (e) => {
-      const d = dot();
-      if (!d) return;
-      root.style.setProperty('--cx', `${e.clientX}px`);
-      root.style.setProperty('--cy', `${e.clientY}px`);
-      d.classList.add('is-active');
-      const over = (e.target as Element | null)?.closest?.(interactive);
-      root.style.setProperty('--cs', over ? '3.2' : '1');
-    },
-    { passive: true },
-  );
-  addEventListener('pointerleave', () => dot()?.classList.remove('is-active'));
-  document.addEventListener('mouseleave', () => dot()?.classList.remove('is-active'));
-}
-
 function init() {
   initReveal();
   initProgress();
   initCountUp();
-  initCursor();
 }
 
 document.addEventListener('astro:page-load', init);
