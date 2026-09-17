@@ -115,9 +115,14 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   theme and can transition. Set the site default with `pattern`, a per-page one with a project's `pattern`
   frontmatter (pages cross-fade between patterns during navigation), or per-section with `sectionPatterns`.
   Compare them all at `/dev/patterns` while running `npm run dev` (not built in production).
-- **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic. Hovering a
-  project card plays its note, clicking a card plays a short arpeggio, any other click ticks. On by default (browsers
-  hold audio until the first click); the speaker toggle in the nav mutes and the choice persists.
+- **Full Experience** (`src/lib/experience.ts`): the site is calm by default; the "Full Experience" pill in the nav
+  turns on the playful layer (`<html data-experience="full">`, persisted). Modules register an `enable()`/`disable()`
+  pair with `registerModule()` — today: sound, cursor dot, count-up numbers, scroll progress; CSS adds richer reveals,
+  hover lift/wipe and a stronger pattern. Reduced-motion visitors start in standard mode and opt in per visit.
+  Nothing essential lives in a module.
+- **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic — a Full
+  Experience module. Hovering a project card plays its note, clicking a card plays a short arpeggio, any other click
+  ticks. The speaker toggle mutes; the module is only downloaded when it's needed.
 - **Motion** (`src/scripts/motion.ts`): scroll reveal, progress bar, count-up, cursor dot. Everything
   respects `prefers-reduced-motion`; with it on, the page renders in its final state.
 - **Fonts:** Inter and JetBrains Mono are self-hosted at build time through Astro's Fonts API

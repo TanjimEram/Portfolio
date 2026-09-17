@@ -1,0 +1,179 @@
+---
+/**
+ * "Full Experience" pill: the entry point for the playful layer (src/lib/experience.ts).
+ * Off = calm site with a gently pulsing dot; on = solid dot + "ON". Explains itself on hover/focus,
+ * and says why it's off for reduced-motion visitors.
+ */
+---
+
+<button
+  type="button"
+  data-experience-toggle
+  class="xp-toggle"
+  aria-pressed="false"
+  aria-label="Full experience off"
+  data-tip="Sound, cursor and richer motion. Off by default."
+>
+  <span class="xp-dot" aria-hidden="true"></span>
+  <span class="xp-label">Full Experience</span>
+  <span class="xp-on" aria-hidden="true">ON</span>
+</button>
+
+<style>
+  .xp-toggle {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    height: 2.25rem;
+    padding: 0 0.85rem 0 0.7rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    white-space: nowrap;
+    transition:
+      color 250ms ease,
+      border-color 250ms ease,
+      background-color 250ms ease;
+  }
+  .xp-toggle:hover {
+    color: var(--color-text);
+    border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+  }
+  .xp-toggle[aria-pressed='true'] {
+    color: var(--color-text);
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    background: var(--color-accent-soft);
+  }
+
+  .xp-dot {
+    position: relative;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    transition: background-color 600ms ease;
+  }
+  /* gentle pulse while off, solid when on */
+  .xp-toggle[aria-pressed='false'] .xp-dot::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: inherit;
+    animation: xp-pulse 2.4s ease-out infinite;
+  }
+  @keyframes xp-pulse {
+    0% {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    100% {
+      transform: scale(3);
+      opacity: 0;
+    }
+  }
+
+  .xp-on {
+    display: none;
+    padding: 0.1rem 0.35rem;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    color: var(--color-accent-contrast);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+  }
+  .xp-toggle[aria-pressed='true'] .xp-on {
+    display: inline-block;
+  }
+
+  /* hover / focus explanation */
+  .xp-toggle::after {
+    content: attr(data-tip);
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    right: 0;
+    z-index: 50;
+    max-width: 16rem;
+    padding: 0.45rem 0.65rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-card);
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: normal;
+    text-align: left;
+    line-height: 1.4;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-2px);
+    transition:
+      opacity 200ms ease,
+      transform 200ms ease;
+  }
+  .xp-toggle:hover::after,
+  .xp-toggle:focus-visible::after {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* phones: keep the pill compact */
+  @media (width < 40rem) {
+    .xp-label {
+      display: none;
+    }
+    .xp-toggle {
+      padding: 0 0.6rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .xp-toggle[aria-pressed='false'] .xp-dot::after {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  import { getMode, isFull, onModeChange, toggleMode, toast } from '../lib/experience';
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TOAST_KEY = 'experience-toast';
+
+  const paint = () => {
+    const on = isFull();
+    document.querySelectorAll<HTMLButtonElement>('[data-experience-toggle]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(on));
+      b.setAttribute('aria-label', on ? 'Full experience on' : 'Full experience off');
+      b.dataset.tip = on
+        ? 'Sound, cursor and richer motion are on. Click to return to the calm version.'
+        : reduced
+          ? 'Sound, cursor and richer motion. Off because your system prefers reduced motion — click to turn it on for this visit.'
+          : 'Sound, cursor and richer motion. Off by default — click to look around.';
+    });
+  };
+
+  document.addEventListener('click', (e) => {
+    if (!(e.target as Element).closest('[data-experience-toggle]')) return;
+    toggleMode();
+    if (getMode() === 'full') {
+      try {
+        if (!localStorage.getItem(TOAST_KEY)) {
+          localStorage.setItem(TOAST_KEY, '1');
+          toast('Full experience on — look around.');
+        }
+      } catch {}
+    }
+  });
+
+  onModeChange(paint);
+  document.addEventListener('astro:page-load', paint);
+  paint();
+</script>

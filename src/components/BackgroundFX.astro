@@ -136,6 +136,9 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
       transform: translate3d(-8vmax, 10vmax, 0) scale(1.08);
     }
   }
+  :global(html:not([data-experience='full'])) .fx-glow {
+    animation: none;
+  }
   @media (prefers-reduced-motion: reduce) {
     .fx-glow {
       animation: none;

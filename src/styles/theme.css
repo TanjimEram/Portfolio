@@ -78,3 +78,11 @@
     0 16px 40px -20px rgba(60, 40, 20, 0.22);
   --highlight-card: inset 0 1px 0 rgba(255, 255, 255, 1);
 }
+
+/* Full Experience: a touch more pattern */
+:root[data-experience='full'] {
+  --fx-pattern: 0.2;
+}
+:root[data-experience='full'][data-theme='light'] {
+  --fx-pattern: 0.1;
+}

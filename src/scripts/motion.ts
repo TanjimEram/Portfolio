@@ -1,13 +1,15 @@
 /**
- * Motion: scroll reveal, scroll progress, count-up numbers.
- * Everything here is gated on prefers-reduced-motion; the CSS side is gated too,
- * so with motion reduced the page simply renders in its final state.
- * Re-initialised on every ClientRouter navigation via astro:page-load.
+ * Motion. Scroll reveal runs in both modes (subtle in standard, richer in full — see global.css).
+ * The scroll progress bar, count-up numbers and the cursor dot are Full Experience modules
+ * (src/lib/experience.ts) and switch on/off with the mode.
+ * Everything is gated on prefers-reduced-motion; the CSS side is gated too, so with motion reduced
+ * the page simply renders in its final state. Re-initialised on every ClientRouter navigation.
  */
+import { registerModule, isFull } from '../lib/experience';
 
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---- scroll reveal ---- */
+/* ---- scroll reveal (always) ---- */
 function initReveal() {
   const items = document.querySelectorAll<HTMLElement>('[data-reveal]');
   if (!items.length) return;
@@ -16,10 +18,10 @@ function initReveal() {
     return;
   }
 
-  // Stagger siblings inside the same [data-reveal-group] by 60ms
+  // Stagger siblings inside the same [data-reveal-group]
   document.querySelectorAll<HTMLElement>('[data-reveal-group]').forEach((group) => {
     group.querySelectorAll<HTMLElement>(':scope [data-reveal]').forEach((el, i) => {
-      el.style.setProperty('--reveal-delay', `${Math.min(i, 8) * 60}ms`);
+      el.style.setProperty('--reveal-index', String(Math.min(i, 8)));
     });
   });
 
@@ -37,41 +39,50 @@ function initReveal() {
   items.forEach((el) => io.observe(el));
 }
 
-/* ---- scroll progress ---- */
+/* ---- scroll progress (full) ---- */
+let progressOn = false;
 let progressBound = false;
-function initProgress() {
-  const bar = document.querySelector<HTMLElement>('.scroll-progress');
-  if (!bar) return;
-  if (reduced()) {
-    bar.style.display = 'none';
-    return;
-  }
-  const update = () => {
-    const max = document.documentElement.scrollHeight - innerHeight;
-    document.documentElement.style.setProperty('--scroll-progress', max > 0 ? String(scrollY / max) : '0');
-  };
-  update();
-  if (!progressBound) {
-    progressBound = true;
-    let ticking = false;
-    addEventListener(
-      'scroll',
-      () => {
-        if (ticking) return;
-        ticking = true;
-        requestAnimationFrame(() => {
-          update();
-          ticking = false;
-        });
-      },
-      { passive: true },
-    );
-    addEventListener('resize', update, { passive: true });
-  }
-}
+const updateProgress = () => {
+  if (!progressOn) return;
+  const max = document.documentElement.scrollHeight - innerHeight;
+  document.documentElement.style.setProperty('--scroll-progress', max > 0 ? String(scrollY / max) : '0');
+};
+registerModule({
+  id: 'progress',
+  enable: () => {
+    if (reduced()) return;
+    progressOn = true;
+    updateProgress();
+    if (!progressBound) {
+      progressBound = true;
+      let ticking = false;
+      addEventListener(
+        'scroll',
+        () => {
+          if (ticking || !progressOn) return;
+          ticking = true;
+          requestAnimationFrame(() => {
+            updateProgress();
+            ticking = false;
+          });
+        },
+        { passive: true },
+      );
+      addEventListener('resize', updateProgress, { passive: true });
+    }
+  },
+  disable: () => {
+    progressOn = false;
+    document.documentElement.style.setProperty('--scroll-progress', '0');
+  },
+});
 
-/* ---- count-up ---- */
+/* ---- count-up (full) ---- */
+let countIO: IntersectionObserver | undefined;
 function initCountUp() {
+  countIO?.disconnect();
+  countIO = undefined;
+  if (!isFull()) return;
   const nums = document.querySelectorAll<HTMLElement>('[data-count]');
   if (!nums.length || reduced() || !('IntersectionObserver' in window)) return;
 
@@ -90,24 +101,65 @@ function initCountUp() {
     requestAnimationFrame(tick);
   };
 
-  const io = new IntersectionObserver(
+  countIO = new IntersectionObserver(
     (entries) => {
       for (const e of entries) {
         if (e.isIntersecting) {
           run(e.target as HTMLElement);
-          io.unobserve(e.target);
+          countIO?.unobserve(e.target);
         }
       }
     },
     { threshold: 0.5 },
   );
-  nums.forEach((el) => io.observe(el));
+  nums.forEach((el) => countIO?.observe(el));
 }
+registerModule({ id: 'countup', enable: initCountUp, disable: () => countIO?.disconnect() });
 
-function init() {
+/* ---- cursor dot (full, desktop pointers only; the native cursor stays) ---- */
+let cursorOn = false;
+let cursorBound = false;
+let idleTimer = 0;
+const dot = () => document.querySelector<HTMLElement>('.cursor-dot');
+const hideDot = () => dot()?.classList.remove('is-active');
+registerModule({
+  id: 'cursor',
+  enable: () => {
+    if (reduced() || !matchMedia('(pointer: fine)').matches) return;
+    cursorOn = true;
+    if (cursorBound) return;
+    cursorBound = true;
+    const root = document.documentElement;
+    const interactive = 'a, button, input, select, textarea, [role="button"], [data-cursor]';
+    addEventListener(
+      'pointermove',
+      (e) => {
+        if (!cursorOn) return;
+        const d = dot();
+        if (!d) return;
+        root.style.setProperty('--cx', `${e.clientX}px`);
+        root.style.setProperty('--cy', `${e.clientY}px`);
+        d.classList.add('is-active');
+        root.style.setProperty('--cs', (e.target as Element | null)?.closest?.(interactive) ? '3.2' : '1');
+        // never leave the dot parked on a still page: hide after a moment of no movement, and on scroll
+        clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(hideDot, 1500);
+      },
+      { passive: true },
+    );
+    addEventListener('scroll', hideDot, { passive: true });
+    document.addEventListener('mouseleave', hideDot);
+  },
+  disable: () => {
+    cursorOn = false;
+    hideDot();
+  },
+});
+
+document.addEventListener('astro:page-load', () => {
   initReveal();
-  initProgress();
-  initCountUp();
-}
-
-document.addEventListener('astro:page-load', init);
+  if (isFull()) {
+    updateProgress();
+    initCountUp();
+  }
+});

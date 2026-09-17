@@ -1,8 +1,8 @@
 ---
 /**
- * Speaker toggle for the sound layer. Sound is ON by default; muting persists in localStorage.
- * The sound module (src/scripts/sound.ts) is imported on load unless the visitor has muted.
- * Browsers only allow audio after a gesture, so the first note plays after the first click/keypress.
+ * Speaker toggle = mute for the sound layer. Sound itself is a Full Experience module
+ * (src/lib/experience.ts): it plays only in full mode, and only when not muted.
+ * The toggle is hidden in standard mode. The sound module (src/scripts/sound.ts) is imported on demand.
  */
 ---
 
@@ -12,7 +12,7 @@
   class="sound-toggle inline-flex size-9 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-text"
   aria-pressed="true"
   aria-label="Sound on"
-  title="Toggle sound"
+  title="Mute sound"
 >
   <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <path d="M11 5 6 9H3v6h3l5 4V5Z" />
@@ -59,71 +59,50 @@
 </style>
 
 <script>
+  import { registerModule, isFull } from '../lib/experience';
+
   const KEY = 'sound';
-  const TOAST_KEY = 'sound-toast';
-  const read = (k: string) => {
+  const read = () => {
     try {
-      return localStorage.getItem(k);
+      return localStorage.getItem(KEY);
     } catch {
       return null;
     }
   };
-  const write = (k: string, v: string) => {
-    try {
-      localStorage.setItem(k, v);
-    } catch {}
-  };
 
-  let on = read(KEY) !== 'off';
+  let muted = read() === 'off';
   let mod: typeof import('../scripts/sound') | undefined;
 
   const paint = () => {
     document.querySelectorAll<HTMLButtonElement>('[data-sound-toggle]').forEach((b) => {
-      b.setAttribute('aria-pressed', String(on));
-      b.setAttribute('aria-label', on ? 'Sound on' : 'Sound off');
+      b.setAttribute('aria-pressed', String(!muted));
+      b.setAttribute('aria-label', muted ? 'Sound off' : 'Sound on');
+      b.title = muted ? 'Unmute sound' : 'Mute sound';
     });
   };
 
-  const toast = (text: string) => {
-    const el = document.createElement('div');
-    el.setAttribute('role', 'status');
-    el.className =
-      'fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full border border-border bg-surface px-4 py-2 text-sm shadow-lg';
-    el.textContent = text;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3200);
-  };
-
-  const apply = async (next: boolean) => {
-    on = next;
-    paint();
-    write(KEY, on ? 'on' : 'off');
-    if (!on) {
-      mod?.setEnabled(false);
-      return;
-    }
+  const play = async () => {
     mod ??= await import('../scripts/sound');
     mod.setEnabled(true);
   };
 
-  paint();
-  if (on) void apply(true);
-
-  // One-time hint, shown at the first gesture (which is also what unlocks audio)
-  if (!read(TOAST_KEY)) {
-    document.addEventListener(
-      'pointerdown',
-      () => {
-        if (!on) return;
-        write(TOAST_KEY, '1');
-        toast('Sound on — hover the projects. Mute with the speaker icon.');
-      },
-      { once: true },
-    );
-  }
+  registerModule({
+    id: 'sound',
+    enable: () => (muted ? undefined : play()),
+    disable: () => mod?.setEnabled(false),
+  });
 
   document.addEventListener('click', (e) => {
-    if ((e.target as Element).closest('[data-sound-toggle]')) void apply(!on);
+    if (!(e.target as Element).closest('[data-sound-toggle]')) return;
+    muted = !muted;
+    try {
+      localStorage.setItem(KEY, muted ? 'off' : 'on');
+    } catch {}
+    paint();
+    if (muted) mod?.setEnabled(false);
+    else if (isFull()) void play();
   });
+
   document.addEventListener('astro:page-load', paint);
+  paint();
 </script>

@@ -2,6 +2,7 @@
 import { siteConfig } from '../site.config';
 import ThemeToggle from './ThemeToggle.astro';
 import SoundToggle from './SoundToggle.astro';
+import ExperienceToggle from './ExperienceToggle.astro';
 
 const initials = siteConfig.name
   .split(' ')
@@ -30,6 +31,7 @@ const initials = siteConfig.name
           ))
         }
       </ul>
+      <ExperienceToggle />
       <SoundToggle />
       <ThemeToggle />
     </div>

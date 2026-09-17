@@ -101,6 +101,14 @@ if (accent) {
             }
             document.documentElement.dataset.theme = t;
           } catch {}
+          // Experience mode: saved choice, but never auto-enable "full" for reduced-motion users
+          try {
+            var x = localStorage.getItem('experience');
+            var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            document.documentElement.dataset.experience = x === 'full' && !rm ? 'full' : 'standard';
+          } catch {
+            document.documentElement.dataset.experience = 'standard';
+          }
           document.documentElement.classList.add('js');
         }
         apply();
@@ -124,10 +132,12 @@ if (accent) {
       <slot />
     </main>
     <Footer />
+    <div class="cursor-dot" aria-hidden="true" transition:persist="cursor-dot"></div>
     {import.meta.env.DEV && <DevAccentSwitcher />}
   </body>
 </html>
 
 <script>
+  import '../lib/experience';
   import '../scripts/motion';
 </script>
