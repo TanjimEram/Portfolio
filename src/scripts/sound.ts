@@ -49,6 +49,16 @@ if (canHover) {
   );
 }
 
+// Doodles drawing themselves ask for a pen scratch — at most one per second across the page
+let lastScratch = 0;
+document.addEventListener('doodle:draw', () => {
+  if (!enabled) return;
+  const now = performance.now();
+  if (now - lastScratch < 1000) return;
+  lastScratch = now;
+  synth.scratch();
+});
+
 // Click: arpeggio on project cards (then navigate), tick on nav links and buttons.
 // Capture phase so this runs before ClientRouter's own click handler, which would navigate at once.
 document.addEventListener(

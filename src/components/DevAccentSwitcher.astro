@@ -22,7 +22,8 @@ const patternOptions = patternNames.map((name) => {
     <option value="">pattern…</option>
     {patternOptions.map((p) => <option value={p.name} data-image={p.image} data-size={p.size} data-fine={p.fine} data-rotate={p.rotate}>{p.name}</option>)}
   </select>
-  <a href="/dev/patterns" class="reset">all</a>
+  <a href="/dev/patterns" class="reset">patterns</a>
+  <a href="/dev/doodles" class="reset">doodles</a>
   <button type="button" data-accent="" class="reset">Reset</button>
 </div>
 

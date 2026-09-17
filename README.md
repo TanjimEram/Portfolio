@@ -120,6 +120,10 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   pair with `registerModule()` — today: sound, cursor dot, count-up numbers, scroll progress; CSS adds richer reveals,
   hover lift/wipe and a stronger pattern. Reduced-motion visitors start in standard mode and opt in per visit.
   Nothing essential lives in a module.
+- **Doodles** (`src/modules/doodles/`, flag `features.doodles`): 13 hand-drawn single-stroke SVG paths that draw
+  themselves on scroll. Placements are declared in `siteConfig.doodles` (`{ selector, text?, type, position, offset,
+  size, rotation, mobile }`) and rendered into a document-level layer, so they never touch layout. Hidden below
+  768 px unless a placement sets `mobile: true`. Review the library at `/dev/doodles` in dev.
 - **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic — a Full
   Experience module. Hovering a project card plays its note, clicking a card plays a short arpeggio, any other click
   ticks. The speaker toggle mutes; the module is only downloaded when it's needed.

@@ -3,6 +3,7 @@
  * Components must read from here (or from content collections) — never hardcode.
  */
 import type { PatternName } from './lib/patterns';
+import type { DoodlePlacement } from './modules/doodles/types';
 
 export type SectionId =
   | 'hero'
@@ -85,7 +86,13 @@ export interface SiteConfig {
     end?: string;
   }[];
 
-  /** Feature flags reserved for later modules. Keep false until the module exists. */
+  /**
+   * Margin doodles (Full Experience only, `features.doodles`). Declared here, never in components.
+   * `selector` (+ optional `text`) picks the target; doodles sit in the whitespace around it.
+   */
+  doodles?: DoodlePlacement[];
+
+  /** Feature flags for optional Full Experience modules. Keep false until the module exists. */
   features: {
     doodles: boolean;
     easterEggs: boolean;
@@ -165,8 +172,22 @@ export const siteConfig: SiteConfig = {
     { degree: 'HSC, Science', institution: 'Adamjee Cantonment College', start: '2019', end: '2021' },
   ],
 
+  doodles: [
+    // curved arrow pointing at the hero CTA
+    { selector: '#hero a[href="#projects"]', type: 'arrow-curve', position: 'below', offset: { x: 40, y: 10 }, size: 72, rotation: 200 },
+    // circle around the middle stat
+    { selector: '#hero dl > div:nth-child(2) dd', type: 'circle-scribble', position: 'over', size: '1.35w', offset: { x: -4 } },
+    // rough underline under the About heading
+    { selector: '#about h2', type: 'underline-rough', position: 'below', size: '1.1w', offset: { x: -4, y: -12 } },
+    // star-burst beside the Top Contributor award
+    { selector: '#experience li', text: 'Top Contributor', type: 'star-burst', position: 'right', size: 26, offset: { x: 4, y: -2 } },
+    // brackets framing the contact email
+    { selector: '#contact a[href^="mailto:"]', type: 'bracket-left', position: 'left', size: 14, offset: { x: -2 } },
+    { selector: '#contact a[href^="mailto:"]', type: 'bracket-right', position: 'right', size: 14, offset: { x: 2 } },
+  ],
+
   features: {
-    doodles: false,
+    doodles: true,
     easterEggs: false,
     caseFile: false,
     terminalView: false,

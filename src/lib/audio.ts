@@ -20,6 +20,8 @@ export interface Synth {
   arpeggio(index: number): void;
   /** Quiet, high, very short — for buttons and nav. */
   tick(): void;
+  /** 40 ms filtered noise burst — a pen scratch for doodles drawing themselves. */
+  scratch(): void;
   /** Call from a user gesture to create/resume the context. */
   unlock(): void;
 }
@@ -65,7 +67,38 @@ export function createSynth(master = 0.12): Synth {
     };
   };
 
+  let noise: AudioBuffer | undefined;
+  const scratch = () => {
+    const c = ensure();
+    if (!c || !out) return;
+    if (!noise) {
+      noise = c.createBuffer(1, Math.ceil(c.sampleRate * 0.05), c.sampleRate);
+      const d = noise.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const t = c.currentTime;
+    const src = c.createBufferSource();
+    src.buffer = noise;
+    const bp = c.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2600 + Math.random() * 800;
+    bp.Q.value = 1.4;
+    const env = c.createGain();
+    env.gain.setValueAtTime(0.0001, t);
+    env.gain.exponentialRampToValueAtTime(0.12, t + 0.004);
+    env.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
+    src.connect(bp).connect(env).connect(out);
+    src.start(t);
+    src.stop(t + 0.05);
+    src.onended = () => {
+      src.disconnect();
+      bp.disconnect();
+      env.disconnect();
+    };
+  };
+
   return {
+    scratch,
     pluck: (hz, o = {}) => voice(hz, 'triangle', o.gain ?? 1, 0.005, o.decay ?? 0.25, 1800),
     arpeggio: (index) => {
       [0, 2, 4].forEach((step, i) => voice(noteFor(index + step), 'triangle', 0.9, 0.005, 0.22, 1800, i * 0.07));

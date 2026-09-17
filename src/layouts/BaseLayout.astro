@@ -7,6 +7,7 @@ import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
 import BackgroundFX from '../components/BackgroundFX.astro';
 import DevAccentSwitcher from '../components/DevAccentSwitcher.astro';
+import Doodles from '../components/Doodles.astro';
 import { accentSet } from '../lib/color';
 import { patternVars, type PatternName } from '../lib/patterns';
 
@@ -103,9 +104,11 @@ if (accent) {
           } catch {}
           // Experience mode: saved choice, but never auto-enable "full" for reduced-motion users
           try {
-            var x = localStorage.getItem('experience');
+            // ?experience=full|standard forces the mode for this load (testing), like ?theme
+            var qx = new URLSearchParams(location.search).get('experience');
+            var x = qx === 'full' || qx === 'standard' ? qx : localStorage.getItem('experience');
             var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
-            document.documentElement.dataset.experience = x === 'full' && !rm ? 'full' : 'standard';
+            document.documentElement.dataset.experience = x === 'full' && (!rm || qx === 'full') ? 'full' : 'standard';
           } catch {
             document.documentElement.dataset.experience = 'standard';
           }
@@ -133,6 +136,7 @@ if (accent) {
     </main>
     <Footer />
     <div class="cursor-dot" aria-hidden="true" transition:persist="cursor-dot"></div>
+    {siteConfig.features.doodles && <Doodles />}
     {import.meta.env.DEV && <DevAccentSwitcher />}
   </body>
 </html>

@@ -1,0 +1,13 @@
+---
+/**
+ * Mounts the doodle module (Full Experience only) and hands it the placements from site.config
+ * as JSON. Rendered by BaseLayout when `features.doodles` is on. Nothing is drawn in standard mode.
+ */
+import { siteConfig } from '../site.config';
+---
+
+<script type="application/json" data-doodle-placements set:html={JSON.stringify(siteConfig.doodles ?? [])} />
+
+<script>
+  import '../modules/doodles';
+</script>

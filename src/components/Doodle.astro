@@ -1,0 +1,30 @@
+---
+/**
+ * Static renderer for one doodle path (dev gallery, or hand-placed in markup).
+ * The runtime module draws its own SVGs; this only shares the path library.
+ */
+import { doodlePaths, type DoodleType } from '../modules/doodles/paths';
+
+interface Props {
+  type: DoodleType;
+  /** width in px */
+  size?: number;
+  rotation?: number;
+  class?: string;
+}
+
+const { type, size = 96, rotation = 0, class: cls } = Astro.props;
+const def = doodlePaths[type];
+---
+
+<svg
+  viewBox={`0 0 ${def.w} ${def.h}`}
+  class:list={['doodle', cls]}
+  width={size}
+  height={(size * def.h) / def.w}
+  style={`--doodle-rotate:${rotation}deg`}
+  data-type={type}
+  aria-hidden="true"
+>
+  <path d={def.d} pathLength="1"></path>
+</svg>

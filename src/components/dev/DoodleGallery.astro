@@ -1,0 +1,62 @@
+---
+/**
+ * DEV ONLY (/dev/doodles): every path in the doodle library, drawn on load, wobbling on hover.
+ */
+import Doodle from '../Doodle.astro';
+import { doodlePaths, doodleTypes } from '../../modules/doodles/paths';
+import { siteConfig } from '../../site.config';
+---
+
+<div class="container-wide py-12">
+  <p class="label-mono">Dev · doodle library</p>
+  <h1 class="mt-3 text-4xl font-extrabold tracking-[-0.03em]">Doodles</h1>
+  <p class="mt-4 max-w-[60ch] text-muted">
+    {doodleTypes.length} hand-drawn paths, each a single <code>&lt;path&gt;</code> normalised with
+    <code>pathLength="1"</code> so drawing is one dash animation. Hover to wobble. Click a card to redraw.
+    On the site they appear only in Full Experience with <code>features.doodles</code> on —
+    {siteConfig.doodles?.length ?? 0} placements are configured.
+  </p>
+
+  <ul class="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4" data-doodle-gallery>
+    {
+      doodleTypes.map((type, i) => (
+        <li class="card flex flex-col items-center gap-4 p-6">
+          <div class="flex h-32 items-center justify-center">
+            <Doodle type={type} size={Math.min(120, 120 * (doodlePaths[type].w / Math.max(doodlePaths[type].w, doodlePaths[type].h)))} rotation={((i * 7919) % 17) - 8} />
+          </div>
+          <span class="font-mono text-xs text-muted">{type}</span>
+          <span class="font-mono text-[0.65rem] text-muted opacity-70">
+            {doodlePaths[type].w}×{doodlePaths[type].h}
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <section class="mt-14">
+    <p class="label-mono">In context</p>
+    <p class="mt-3 max-w-[60ch] text-muted">
+      Switch on Full Experience in the nav and go to the <a href="/" class="text-accent-ink underline">home page</a>: the
+      placements from <code>site.config.ts</code> draw themselves in the margins as they scroll into view.
+    </p>
+  </section>
+</div>
+
+<script>
+  const draw = () => {
+    document.querySelectorAll<SVGSVGElement>('[data-doodle-gallery] .doodle').forEach((d, i) => {
+      d.classList.remove('is-drawn');
+      void d.getBoundingClientRect();
+      setTimeout(() => d.classList.add('is-drawn'), 80 + i * 90);
+    });
+  };
+  document.addEventListener('astro:page-load', draw);
+  document.addEventListener('click', (e) => {
+    const card = (e.target as Element).closest('[data-doodle-gallery] li');
+    const d = card?.querySelector<SVGSVGElement>('.doodle');
+    if (!d) return;
+    d.classList.remove('is-drawn');
+    void d.getBoundingClientRect();
+    setTimeout(() => d.classList.add('is-drawn'), 30);
+  });
+</script>

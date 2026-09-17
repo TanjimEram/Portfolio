@@ -1,0 +1,158 @@
+---
+/**
+ * DEV ONLY (/dev/patterns): compares every pattern at several scales and colours, and prints worst-case
+ * text contrast over each (at Full Experience opacity, the strongest the pattern ever gets).
+ */
+import { patternNames, patterns, patternVars } from '../../lib/patterns';
+import { contrast, hexToRgb, type RGB } from '../../lib/color';
+
+
+const scales = [0.75, 1, 1.5];
+const swatchColors = ['#e8412f', '#d6301f', '#2563eb', '#f59e0b', '#ffffff'];
+
+// Worst case for text over a pattern: a fully covered pixel = accent at layer opacity over the page bg.
+// Keep in sync with theme.css (--fx-pattern, bg, text, muted).
+const themes = {
+  dark: { bg: '#0b0b0c', text: '#f4f4f5', muted: '#8e8e95', opacity: 0.2 },
+  light: { bg: '#faf9f7', text: '#131315', muted: '#5c5c63', opacity: 0.1 },
+};
+const mix = (a: RGB, b: RGB, t: number): RGB => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+const probes = Object.entries(themes).flatMap(([theme, t]) =>
+  swatchColors.map((accent) => {
+    const worst = mix(hexToRgb(t.bg), hexToRgb(accent), t.opacity);
+    return {
+      theme,
+      accent,
+      text: contrast(hexToRgb(t.text), worst),
+      muted: contrast(hexToRgb(t.muted), worst),
+    };
+  }),
+);
+---
+
+  <div class="container-wide py-12">
+    <p class="label-mono">Dev · pattern library</p>
+    <h1 class="mt-3 text-4xl font-extrabold tracking-[-0.03em]">Patterns</h1>
+    <p class="mt-4 max-w-[60ch] text-muted">
+      Live tiles use <code>mask-image</code> over <code>--color-accent</code> (same as the site). Fixed colours are
+      baked into the SVG. Use the switcher (bottom-right) to change the accent or the page pattern.
+    </p>
+
+    <section class="mt-10">
+      <p class="label-mono">Worst-case text contrast over a pattern (fully covered pixel at layer opacity)</p>
+      <table class="mt-4 w-full max-w-2xl text-left font-mono text-xs">
+        <thead class="text-muted">
+          <tr>
+            <th class="py-2 pr-4 font-medium">theme</th>
+            <th class="py-2 pr-4 font-medium">accent</th>
+            <th class="py-2 pr-4 font-medium">text</th>
+            <th class="py-2 pr-4 font-medium">muted</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            probes.map((p) => (
+              <tr class="border-t border-border">
+                <td class="py-2 pr-4">{p.theme}</td>
+                <td class="py-2 pr-4">{p.accent}</td>
+                <td class:list={['py-2 pr-4', p.text < 4.5 && 'text-accent-ink']}>{p.text.toFixed(2)}:1</td>
+                <td class:list={['py-2 pr-4', p.muted < 4.5 && 'text-accent-ink']}>{p.muted.toFixed(2)}:1</td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </section>
+
+    <div class="mt-14 space-y-14">
+      {
+        patternNames.map((name) => (
+          <section>
+            <div class="flex items-baseline justify-between gap-4">
+              <h2 class="text-2xl font-bold tracking-tight">{name}</h2>
+              <span class="font-mono text-xs text-muted">
+                tile {patterns[name]().width}×{patterns[name]().height}px · rotate {patterns[name]().rotation}°
+              </span>
+            </div>
+
+            <div class="mt-4 grid gap-4 sm:grid-cols-3">
+              {scales.map((scale) => (
+                <figure class="card">
+                  <div class="tile" style={patternVars(name, { scale })} />
+                  <figcaption class="px-4 py-2 font-mono text-xs text-muted">accent · scale {scale}</figcaption>
+                </figure>
+              ))}
+            </div>
+
+            <div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+              {swatchColors.map((color) => {
+                const p = patterns[name]({ color, opacity: 0.35 });
+                return (
+                  <figure class="card">
+                    <div
+                      class="swatch"
+                      style={`--sw-image:${p.uri};--sw-size:${p.width}px ${p.height}px;--sw-rotate:${p.rotation}deg`}
+                    />
+                    <figcaption class="px-4 py-2 font-mono text-xs text-muted">{color} · baked</figcaption>
+                  </figure>
+                );
+              })}
+            </div>
+
+            <div class="card probe mt-4 p-6" style={patternVars(name)}>
+              <p class="label-mono">Text probe · full density</p>
+              <p class="mt-3 max-w-[46ch]">Body text must stay readable over the pattern at layer opacity.</p>
+              <p class="mt-1 max-w-[46ch] text-sm text-muted">
+                Muted copy is the tighter case: check it against the numbers above.
+              </p>
+            </div>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+
+<style>
+  /* Live tile: identical recipe to BackgroundFX's pattern layer, unmasked so density is visible */
+  .tile,
+  .swatch {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+  .tile::after,
+  .swatch::after,
+  .probe::before {
+    content: '';
+    position: absolute;
+    inset: -30%;
+    transform: rotate(var(--pattern-rotate, 0deg));
+  }
+  .tile::after,
+  .probe::before {
+    background-color: var(--color-accent);
+    opacity: var(--fx-pattern);
+    mask-image: var(--pattern-image);
+    -webkit-mask-image: var(--pattern-image);
+    mask-size: var(--pattern-size);
+    -webkit-mask-size: var(--pattern-size);
+    transition: background-color 600ms ease;
+  }
+  .tile::after {
+    opacity: 0.4; /* boosted so the shape is easy to compare */
+  }
+  .swatch {
+    background-color: #0b0b0c;
+  }
+  .swatch::after {
+    background-image: var(--sw-image);
+    background-size: var(--sw-size);
+    transform: rotate(var(--sw-rotate, 0deg));
+  }
+  .probe {
+    isolation: isolate;
+  }
+  .probe::before {
+    z-index: -1;
+  }
+</style>
