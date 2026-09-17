@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from '../site.config';
 import ThemeToggle from './ThemeToggle.astro';
+import SoundToggle from './SoundToggle.astro';
 
 const initials = siteConfig.name
   .split(' ')
@@ -29,6 +30,7 @@ const initials = siteConfig.name
           ))
         }
       </ul>
+      {siteConfig.features.synthHover && <SoundToggle />}
       <ThemeToggle />
     </div>
   </nav>

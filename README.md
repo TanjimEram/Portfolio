@@ -44,7 +44,7 @@ Node **22.12+** is required (see `engines` in `package.json`).
 | `sections`           | Home-page section **order**; set `enabled: false` to hide one                                |
 | `pattern`, `sectionPatterns` | Site background pattern, and optional per-section overrides                         |
 | `about`, `skills`, `education` | Plain copy and grouped lists                                                       |
-| `features`           | Flags for optional modules — keep `false` unless the module exists                           |
+| `features`           | Optional modules. `synthHover` = hover/click sound layer (visitor-toggled, off by default)   |
 
 Then:
 
@@ -115,6 +115,9 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   theme and can transition. Set the site default with `pattern`, a per-page one with a project's `pattern`
   frontmatter (pages cross-fade between patterns during navigation), or per-section with `sectionPatterns`.
   Compare them all at `/dev/patterns` while running `npm run dev` (not built in production).
+- **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`, flag `features.synthHover`): a ~2 KB Web Audio synth,
+  D-major pentatonic. Off by default; a speaker toggle in the nav turns it on and persists the choice. The module
+  is only downloaded once a visitor enables it, and reduced-motion users are never auto-enabled.
 - **Motion** (`src/scripts/motion.ts`): scroll reveal, progress bar, count-up, cursor dot. Everything
   respects `prefers-reduced-motion`; with it on, the page renders in its final state.
 - **Fonts:** Inter and JetBrains Mono are self-hosted at build time through Astro's Fonts API

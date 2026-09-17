@@ -14,7 +14,7 @@ const href = `/projects/${project.id}/`;
 const num = String(index).padStart(2, '0');
 ---
 
-<article class="card group flex flex-col" data-reveal>
+<article class="card group flex flex-col" data-reveal data-sound-note={index - 1}>
   {
     image && (
       <Image

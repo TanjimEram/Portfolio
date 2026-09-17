@@ -85,7 +85,7 @@ export interface SiteConfig {
     end?: string;
   }[];
 
-  /** Feature flags reserved for later modules. Keep false until built. */
+  /** Feature flags for optional modules. Keep false until the module exists. */
   features: {
     synthHover: boolean;
     doodles: boolean;
@@ -167,7 +167,8 @@ export const siteConfig: SiteConfig = {
   ],
 
   features: {
-    synthHover: false,
+    /** Hover/click sound layer (src/lib/audio.ts). Off for visitors until they toggle it on. */
+    synthHover: true,
     doodles: false,
     easterEggs: false,
     caseFile: false,
