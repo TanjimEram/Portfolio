@@ -4,6 +4,7 @@ summary: Event website for Marxcellence 2025, a national digital marketing case 
 description: Designed and launched the event website for Marxcellence 2025, a national digital marketing case competition run by NSU MiBC.
 tech: [HTML]
 repo: https://github.com/TanjimEram/MarXcellence2025
+color: '#2563eb' # TODO: replace with the real brand colour
 # live: TODO
 # image: TODO (./marxcellence-2025-website.png)
 featured: false

@@ -13,8 +13,11 @@ const projects = defineCollection({
       repo: z.string().url().optional(),
       live: z.string().url().optional(),
       image: image().optional(),
-      /** Any CSS color; overrides --color-accent on the detail page ("chameleon") */
-      color: z.string().optional(),
+      /** Hex colour (#rgb or #rrggbb); overrides the accent on the detail page ("chameleon") */
+      color: z
+        .string()
+        .regex(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i, 'color must be a hex colour like #2563eb')
+        .optional(),
       featured: z.boolean().default(false),
       order: z.number().default(0),
       source: z.enum(['github', 'manual']).default('manual'),

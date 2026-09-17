@@ -4,18 +4,28 @@ import '../styles/global.css';
 import { siteConfig } from '../site.config';
 import Nav from '../components/Nav.astro';
 import Footer from '../components/Footer.astro';
+import { accentSet } from '../lib/color';
 
 interface Props {
   title?: string;
   description?: string;
-  /** Per-page accent override (project "chameleon"). Any CSS color. */
+  /** Per-page accent override (project "chameleon"). Hex colour. */
   accent?: string;
 }
 
 const { title, description = siteConfig.seo.description, accent } = Astro.props;
 const pageTitle = title ? `${title} — ${siteConfig.seo.title}` : siteConfig.seo.title;
 const canonical = siteConfig.seo.url ? new URL(Astro.url.pathname, siteConfig.seo.url).href : undefined;
-const rootStyle = accent ? `--color-accent: ${accent};` : undefined;
+
+// Chameleon: expose the page accent (contrast-corrected per theme) plus a subtle bg tint.
+// The <html> style is swapped by ClientRouter on navigation, so leaving the page restores red.
+let rootStyle: string | undefined;
+if (accent) {
+  const a = accentSet(accent);
+  rootStyle =
+    `--accent-dark: ${a.dark}; --accent-dark-contrast: ${a.darkContrast}; ` +
+    `--accent-light: ${a.light}; --accent-light-contrast: ${a.lightContrast}; --bg-tint: 5%;`;
+}
 ---
 
 <!doctype html>

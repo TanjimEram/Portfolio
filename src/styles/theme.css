@@ -4,33 +4,24 @@
  * Red is an accent only: links, highlights, buttons, focus rings.
  */
 
-/* Registered so --color-accent can animate on project pages ("chameleon") */
-@property --color-accent {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #e11d2e;
-}
-@property --color-accent-contrast {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #ffffff;
-}
-@property --color-bg {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #0a0a0a;
-}
+/*
+ * Per-page accent ("chameleon"): a page may set these on <html>
+ *   --accent-dark / --accent-dark-contrast   used while the dark theme is active
+ *   --accent-light / --accent-light-contrast used while the light theme is active
+ *   --bg-tint                                 how much accent to mix into bg/surface (default 0%)
+ * BaseLayout writes them from the `accent` prop; src/lib/color.ts keeps them WCAG AA.
+ */
 
 :root {
   color-scheme: dark;
 
-  --color-bg: #0a0a0a;
-  --color-surface: #161616;
+  --color-accent: var(--accent-dark, #ef3344); /* 4.9:1 on bg */
+  --color-accent-contrast: var(--accent-dark-contrast, #000000); /* 5.2:1 on accent */
+  --color-bg: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #0a0a0a);
+  --color-surface: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #161616);
   --color-text: #f5f5f5;
   --color-muted: #a3a3a3;
   --color-border: #262626;
-  --color-accent: #e11d2e;
-  --color-accent-contrast: #ffffff;
 
   --font-sans: 'Inter', 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -42,11 +33,11 @@
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --color-bg: #ffffff;
-  --color-surface: #f5f5f5;
+  --color-accent: var(--accent-light, #c81e2b); /* 5.7:1 on bg */
+  --color-accent-contrast: var(--accent-light-contrast, #ffffff); /* 5.7:1 on accent */
+  --color-bg: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #ffffff);
+  --color-surface: color-mix(in oklab, var(--color-accent) var(--bg-tint, 0%), #f5f5f5);
   --color-text: #0a0a0a;
   --color-muted: #525252;
   --color-border: #e5e5e5;
-  --color-accent: #c81e2b;
-  --color-accent-contrast: #ffffff;
 }
