@@ -23,6 +23,7 @@ const num = String(index).padStart(2, '0');
         widths={[480, 800, 1000]}
         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
         class="aspect-[16/10] w-full object-cover"
+        transition:name={`project-image-${project.id}`}
       />
     )
   }

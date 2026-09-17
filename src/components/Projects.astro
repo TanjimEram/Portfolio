@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getHomeProjects } from '../lib/projects';
 import ProjectCard from './ProjectCard.astro';
 import Section from './Section.astro';
 
@@ -8,16 +8,12 @@ interface Props {
 }
 const { number } = Astro.props;
 
-const all = await getCollection('projects');
-const featured = all.filter((p) => p.data.featured);
-// Until something is marked featured, show everything so the section isn't empty.
-const shown = (featured.length > 0 ? featured : all).sort(
-  (a, b) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title),
-);
+// Featured projects; until something is marked featured, everything (so the section isn't empty).
+const { projects: shown, featuredOnly } = await getHomeProjects();
 const total = String(shown.length).padStart(2, '0');
 ---
 
-<Section id="projects" title={featured.length > 0 ? 'Featured projects' : 'Projects'} label="Work" number={number} wide>
+<Section id="projects" title={featuredOnly ? 'Featured projects' : 'Projects'} label="Work" number={number} wide>
   {/* Slider-style counter: "01 ———— 0N" */}
   <div class="mb-6 flex items-center gap-4 font-mono text-xs text-muted" aria-hidden="true" data-reveal>
     <span>01</span>

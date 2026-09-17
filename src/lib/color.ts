@@ -101,21 +101,34 @@ export interface AccentSet {
   lightContrast: string;
 }
 
-/** Theme surfaces — keep in sync with src/styles/theme.css (text sits on bg AND surfaces, so test the lighter one) */
-const DARK_SURFACE: RGB = [0x1c, 0x1c, 0x20];
+/** Theme backgrounds/surfaces — keep in sync with src/styles/theme.css */
+const DARK_BG: RGB = [0x0b, 0x0b, 0x0c];
+const DARK_SURFACE: RGB = [0x1c, 0x1c, 0x20]; // lightest dark surface: text must pass here too
+const LIGHT_BG: RGB = [0xfa, 0xfa, 0xfb];
 const LIGHT_SURFACE: RGB = [255, 255, 255];
 
+/** WCAG AA: 4.5:1 for text (we aim a little higher to survive the bg tint), 3:1 for non-text UI */
+const TEXT_RATIO = 4.7;
+const UI_RATIO = 3;
+
+/**
+ * Derive per-theme accent variants from a project colour:
+ *  - `dark`/`light`: the fill colour (buttons, glow, pattern, disc). Kept as given unless it can't
+ *    reach 3:1 against the page background — a near-black project colour would otherwise vanish on the
+ *    dark theme — in which case it is lightened/darkened just enough.
+ *  - `*Ink`: the same hue nudged to ≥ 4.7:1 on the lightest surface, for links and labels.
+ *  - `*Contrast`: black or white, whichever reads better on the fill.
+ */
 export function accentSet(hex: string): AccentSet {
   const base = hexToRgb(hex);
-  // Fills keep the raw colour; ink variants are corrected for AA text contrast.
-  const darkInk = ensureContrast(base, DARK_SURFACE, 4.7);
-  const lightInk = ensureContrast(base, LIGHT_SURFACE, 4.7);
+  const dark = ensureContrast(base, DARK_BG, UI_RATIO);
+  const light = ensureContrast(base, LIGHT_BG, UI_RATIO);
   return {
-    dark: rgbToHex(base),
-    darkInk: rgbToHex(darkInk),
-    darkContrast: contrastColor(base),
-    light: rgbToHex(base),
-    lightInk: rgbToHex(lightInk),
-    lightContrast: contrastColor(base),
+    dark: rgbToHex(dark),
+    darkInk: rgbToHex(ensureContrast(dark, DARK_SURFACE, TEXT_RATIO)),
+    darkContrast: contrastColor(dark),
+    light: rgbToHex(light),
+    lightInk: rgbToHex(ensureContrast(light, LIGHT_SURFACE, TEXT_RATIO)),
+    lightContrast: contrastColor(light),
   };
 }

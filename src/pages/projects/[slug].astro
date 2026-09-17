@@ -1,78 +1,183 @@
 ---
 import { Image } from 'astro:assets';
-import { getCollection, render } from 'astro:content';
+import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getOrderedProjects, type Project } from '../../lib/projects';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
-  return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
+  const ordered = await getOrderedProjects();
+  return ordered.map((project, i) => ({
+    params: { slug: project.id },
+    props: {
+      project,
+      index: i + 1,
+      total: ordered.length,
+      prev: ordered[i - 1] ?? null,
+      next: ordered[i + 1] ?? null,
+    },
+  }));
 }
 
-const { project } = Astro.props;
-const { Content } = await render(project);
-const { title, summary, description, tech, repo, live, image, color } = project.data;
+interface Props {
+  project: Project;
+  index: number;
+  total: number;
+  prev: Project | null;
+  next: Project | null;
+}
 
+const { project, index, total, prev, next } = Astro.props;
+const { Content } = await render(project);
+const { title, summary, description, tech, repo, live, image, color, source } = project.data;
+
+const pad = (n: number) => String(n).padStart(2, '0');
 // GitHub drafts copy the summary into description; don't print the same line twice.
 const showDescription = description.trim() !== summary.trim();
+const repoName = repo ? repo.replace(/^https?:\/\/(www\.)?github\.com\//, '') : undefined;
+const liveHost = live ? new URL(live).host : undefined;
 ---
 
 <BaseLayout title={title} description={description} accent={color}>
-  <article class="container-narrow py-12 sm:py-20">
-    <a href="/#projects" class="label-mono inline-block py-1 transition-colors hover:text-text">← Work</a>
+  <article class="container-wide py-10 sm:py-16">
+    {/* ---- hero ---- */}
+    <header class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:items-end lg:gap-14" data-reveal-group>
+      <div>
+        <p class="label-mono flex flex-wrap items-center gap-3" data-reveal>
+          <a href="/#projects" class="inline-block py-1 transition-colors hover:text-text">← Work</a>
+          <span class="h-px w-6 bg-current opacity-60" aria-hidden="true"></span>
+          <span>{pad(index)} / {pad(total)}</span>
+        </p>
+        <h1
+          class="mt-6 text-4xl font-extrabold tracking-[-0.03em] sm:text-6xl lg:text-7xl"
+          transition:name={`project-title-${project.id}`}
+          data-reveal
+        >
+          {title}<span class="text-accent" aria-hidden="true">.</span>
+        </h1>
+        <p class="mt-6 max-w-[46ch] text-lg text-muted sm:text-xl" data-reveal>{summary}</p>
 
-    <header class="mt-8" data-reveal-group>
-      <h1 class="text-4xl font-extrabold tracking-[-0.03em] sm:text-6xl" transition:name={`project-title-${project.id}`} data-reveal>
-        {title}<span class="text-accent" aria-hidden="true">.</span>
-      </h1>
-      <p class="mt-5 max-w-[46ch] text-lg text-muted sm:text-xl" data-reveal>{summary}</p>
+        {
+          (live || repo) && (
+            <div class="mt-8 flex flex-wrap gap-3" data-reveal>
+              {live && (
+                <a href={live} class="btn-solid" target="_blank" rel="noopener">
+                  Live site ↗
+                </a>
+              )}
+              {repo && (
+                <a href={repo} class="btn-outline" target="_blank" rel="noopener">
+                  Source ↗
+                </a>
+              )}
+            </div>
+          )
+        }
+      </div>
 
-      {
-        tech.length > 0 && (
-          <ul class="mt-6 flex flex-wrap gap-2 font-mono text-xs" aria-label="Technologies" data-reveal>
-            {tech.map((t) => (
-              <li class="rounded-full border border-border bg-surface-2 px-3 py-1 text-muted">{t}</li>
-            ))}
-          </ul>
-        )
-      }
-
-      {
-        (live || repo) && (
-          <div class="mt-8 flex flex-wrap gap-3" data-reveal>
-            {live && (
-              <a href={live} class="btn-solid" target="_blank" rel="noopener">
-                Live site ↗
-              </a>
-            )}
-            {repo && (
-              <a href={repo} class="btn-outline" target="_blank" rel="noopener">
-                Source ↗
-              </a>
-            )}
-          </div>
-        )
-      }
+      {/* facts panel */}
+      <dl class="card grid gap-5 p-6 text-sm sm:grid-cols-2 lg:grid-cols-1" data-reveal>
+        <div>
+          <dt class="label-mono">Stack</dt>
+          <dd class="mt-3">
+            {
+              tech.length > 0 ? (
+                <ul class="flex flex-wrap gap-2" aria-label="Technologies">
+                  {tech.map((t) => (
+                    <li class="rounded-full border border-border bg-surface-2 px-3 py-1 font-mono text-xs">{t}</li>
+                  ))}
+                </ul>
+              ) : (
+                <span class="text-muted">—</span>
+              )
+            }
+          </dd>
+        </div>
+        <div>
+          <dt class="label-mono">Links</dt>
+          <dd class="mt-3 space-y-1.5">
+            {
+              live ? (
+                <a href={live} class="block truncate text-accent-ink hover:underline" target="_blank" rel="noopener">
+                  {liveHost} ↗
+                </a>
+              ) : null
+            }
+            {
+              repo ? (
+                <a href={repo} class="block truncate text-accent-ink hover:underline" target="_blank" rel="noopener">
+                  {repoName} ↗
+                </a>
+              ) : null
+            }
+            {!live && !repo && <span class="text-muted">—</span>}
+          </dd>
+        </div>
+        <div>
+          <dt class="label-mono">Source</dt>
+          <dd class="mt-3 text-muted">{source === 'github' ? 'Imported from GitHub' : 'Written by hand'}</dd>
+        </div>
+        {
+          color && (
+            <div>
+              <dt class="label-mono">Accent</dt>
+              <dd class="mt-3 flex items-center gap-2 font-mono text-xs text-muted">
+                <span class="inline-block size-4 rounded-full border border-border bg-accent transition-colors duration-500" aria-hidden="true" />
+                {color}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
     </header>
 
+    {/* ---- screenshot ---- */}
     {
       image && (
-        <div class="card mt-12" data-reveal>
+        <figure class="card mt-12 sm:mt-16" transition:name={`project-image-${project.id}`} data-reveal>
           <Image
             src={image}
             alt={`Screenshot of ${title}`}
-            widths={[640, 1024, 1408]}
-            sizes="(min-width: 720px) 704px, 100vw"
+            widths={[720, 1080, 1440, 2160]}
+            sizes="(min-width: 1088px) 1024px, 100vw"
             class="w-full"
             loading="eager"
+            fetchpriority="high"
           />
-        </div>
+        </figure>
       )
     }
 
-    {showDescription && <p class="mt-12 max-w-[46ch] text-lg text-muted" data-reveal>{description}</p>}
-
-    <div class:list={['prose-basic max-w-[60ch]', showDescription ? 'mt-6' : 'mt-12']} data-reveal>
-      <Content />
+    {/* ---- body ---- */}
+    <div class="mt-12 grid gap-10 sm:mt-16 lg:grid-cols-[minmax(0,60ch)_1fr]" data-reveal-group>
+      <div>
+        <p class="label-mono" data-reveal>About the project</p>
+        {showDescription && <p class="mt-5 text-lg text-muted" data-reveal>{description}</p>}
+        <div class="prose-basic mt-5" data-reveal>
+          <Content />
+        </div>
+      </div>
     </div>
+
+    {/* ---- prev / next ---- */}
+    {
+      (prev || next) && (
+        <nav class="mt-16 grid gap-4 sm:mt-24 sm:grid-cols-2" aria-label="More projects" data-reveal>
+          {prev ? (
+            <a href={`/projects/${prev.id}/`} class="card group p-6">
+              <span class="label-mono">← Previous</span>
+              <span class="mt-3 block text-lg font-bold tracking-tight group-hover:text-accent-ink">{prev.data.title}</span>
+            </a>
+          ) : (
+            <span />
+          )}
+          {next && (
+            <a href={`/projects/${next.id}/`} class="card group p-6 sm:text-right">
+              <span class="label-mono">Next →</span>
+              <span class="mt-3 block text-lg font-bold tracking-tight group-hover:text-accent-ink">{next.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
   </article>
 </BaseLayout>
