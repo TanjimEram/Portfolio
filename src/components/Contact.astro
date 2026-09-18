@@ -9,12 +9,12 @@ interface Props {
   pattern?: PatternName;
 }
 const { number, pattern } = Astro.props;
-const { email, links, resume, resumeFilename } = siteConfig;
+const { email, links, resume, resumeFilename, contact } = siteConfig;
 ---
 
 <Section id="contact" title="Get in touch" label="Contact" number={number} pattern={pattern} wide>
   <div class="card p-7 sm:p-10" data-reveal>
-    <p class="max-w-[46ch] text-muted">Email is the quickest way to reach me.</p>
+    <p class="max-w-[52ch] text-muted">{contact.line}</p>
     <a
       href={`mailto:${email}`}
       class="mt-4 inline-flex min-h-11 items-center text-2xl font-bold tracking-tight break-all text-accent-ink transition-colors duration-500 hover:underline sm:text-3xl"

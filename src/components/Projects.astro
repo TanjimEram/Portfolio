@@ -1,5 +1,5 @@
 ---
-import { getHomeProjects } from '../lib/projects';
+import { getHomeProjects, getOrderedProjects } from '../lib/projects';
 import ProjectCard from './ProjectCard.astro';
 import Section from './Section.astro';
 import TerminalHost from './TerminalHost.astro';
@@ -15,6 +15,7 @@ const { number, pattern } = Astro.props;
 
 // Featured projects; until something is marked featured, everything (so the section isn't empty).
 const { projects: shown, featuredOnly } = await getHomeProjects();
+const allCount = (await getOrderedProjects()).length;
 const total = String(shown.length).padStart(2, '0');
 ---
 
@@ -29,7 +30,16 @@ const total = String(shown.length).padStart(2, '0');
   </div>
 
   {siteConfig.features.terminalView && <TerminalHost />}
-  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group data-projects-grid>
+  <div class:list={['grid gap-5 sm:grid-cols-2', shown.length >= 3 && 'lg:grid-cols-3']} data-reveal-group data-projects-grid>
     {shown.map((project, i) => <ProjectCard project={project} index={i + 1} />)}
   </div>
+  {
+    featuredOnly && (
+      <p class="mt-8 text-sm" data-reveal>
+        <a href="/projects/" class="tap-target inline-flex items-center gap-2 font-semibold text-accent-ink hover:underline">
+          All {allCount} projects <span aria-hidden="true">→</span>
+        </a>
+      </p>
+    )
+  }
 </Section>

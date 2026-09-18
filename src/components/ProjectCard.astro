@@ -1,6 +1,8 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import ProjectCover from './ProjectCover.astro';
+import StatusBadge from './StatusBadge.astro';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -9,14 +11,14 @@ interface Props {
 }
 
 const { project, index } = Astro.props;
-const { title, summary, tech, live, repo, image } = project.data;
+const { title, summary, tech, live, repo, image, color, pattern, status } = project.data;
 const href = `/projects/${project.id}/`;
 const num = String(index).padStart(2, '0');
 ---
 
 <article class="card group flex flex-col" data-reveal data-sound-note={index - 1}>
   {
-    image && (
+    image ? (
       <Image
         src={image}
         alt=""
@@ -25,12 +27,17 @@ const num = String(index).padStart(2, '0');
         class="aspect-[16/10] w-full object-cover"
         transition:name={`project-image-${project.id}`}
       />
+    ) : (
+      <ProjectCover title={title} color={color} pattern={pattern} transitionName={`project-image-${project.id}`} />
     )
   }
   <div class="flex flex-1 flex-col p-6">
-    <div class="flex items-center justify-between font-mono text-xs text-muted">
-      <span>{num}</span>
-      {tech[0] && <span class="uppercase tracking-[0.15em]">{tech[0]}</span>}
+    <div class="flex items-center justify-between gap-3 font-mono text-xs text-muted">
+      <span class="flex items-center gap-3">
+        {num}
+        {status && <StatusBadge status={status} />}
+      </span>
+      {tech[0] && <span class="truncate uppercase tracking-[0.15em]">{tech[0]}</span>}
     </div>
     <h3 class="mt-4 text-xl font-bold tracking-tight">
       {/* Stretched link: the whole card is clickable; other links sit above it via z-10 */}

@@ -1,6 +1,14 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
 
 export type Project = CollectionEntry<'projects'>;
+export type ProjectStatus = NonNullable<Project['data']['status']>;
+
+/** Badge text for `status` */
+export const statusLabels: Record<ProjectStatus, string> = {
+  shipped: 'Shipped',
+  'in-development': 'In development',
+  ongoing: 'Ongoing',
+};
 
 const byOrder = (a: Project, b: Project) => a.data.order - b.data.order || a.data.title.localeCompare(b.data.title);
 

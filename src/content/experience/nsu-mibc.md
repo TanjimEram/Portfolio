@@ -1,12 +1,13 @@
 ---
-org: NSU MiBC (North South University)
+org: NSU MiBC
 role: Sub-Executive Body Member
 type: club
 start: '2023'
 highlights:
-  - Coordinated the Logistics, Creative, Sponsorship and Technical teams.
-  - Helped plan and run Intra-Ignite and Marxcellence 2025, a national digital marketing case competition.
-  - Designed and launched the websites for NSU MiBC and Marxcellence 2025.
-  - Received the Top Contributor award at Marxcellence 2025.
+  - Coordinated work across the Logistics, Creative, Sponsorship and Technical teams
+  - Helped plan and run Intra-Ignite and Marxcellence, one of the largest digital marketing case competitions in Bangladesh
+  - Designed and launched the web portals for the club and for Marxcellence
+  - Built the QR ticketing system now used for every club event
+  - Awarded Top Contributor for Marxcellence
 order: 1
 ---

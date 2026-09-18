@@ -1,0 +1,87 @@
+---
+/**
+ * Fallback cover for a project card without a screenshot: the project's colour (theme-adjusted for
+ * contrast), its pattern from the library, and its initials. Never a broken image, never an empty box.
+ */
+import { accentSet } from '../lib/color';
+import { patterns, type PatternName } from '../lib/patterns';
+
+interface Props {
+  title: string;
+  color?: string;
+  pattern?: PatternName;
+  /** Shared with the detail page for the view transition */
+  transitionName?: string;
+}
+const { title, color, pattern = 'halftone', transitionName } = Astro.props;
+
+// "QR Ticketing System" → QR, "NSU MiBC website" → NSU, "Marxcellence website" → M, "Goyenda" → G
+const GENERIC = /^(website|site|app|system|project|platform)$/i;
+const words = title.split(/[\s-]+/).filter((w) => /[a-z0-9]/i.test(w) && !GENERIC.test(w));
+const initials =
+  words[0] && words[0].length <= 3 && words[0] === words[0].toUpperCase()
+    ? words[0]
+    : words
+        .slice(0, 2)
+        .map((w) => w[0]!.toUpperCase())
+        .join('');
+const set = color ? accentSet(color) : undefined;
+const p = patterns[pattern]({ scale: 2 });
+
+const vars = [
+  set && `--cover-dark: ${set.dark}; --cover-light: ${set.light}; --cover-dark-ink: ${set.darkInk}; --cover-light-ink: ${set.lightInk};`,
+  `--cover-pattern: ${p.uri}; --cover-size: ${Math.round(p.width)}px ${Math.round(p.height)}px; --cover-rotate: ${p.rotation}deg;`,
+]
+  .filter(Boolean)
+  .join(' ');
+---
+
+<div class="cover" style={vars} aria-hidden="true" transition:name={transitionName}>
+  <div class="cover-pattern"></div>
+  <span class="cover-initials">{initials}</span>
+</div>
+
+<style>
+  .cover {
+    --cover-fill: var(--cover-dark, var(--color-accent));
+    --cover-ink: var(--cover-dark-ink, var(--color-accent-ink));
+    position: relative;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--cover-fill) 14%, var(--color-surface));
+    transition: background-color 600ms ease;
+  }
+  :global(:root[data-theme='light']) .cover {
+    --cover-fill: var(--cover-light, var(--color-accent));
+    --cover-ink: var(--cover-light-ink, var(--color-accent-ink));
+  }
+  /* the pattern, in the project colour, fading out towards the initials */
+  .cover-pattern {
+    position: absolute;
+    inset: -30%;
+    background-color: var(--cover-fill);
+    mask-image: var(--cover-pattern);
+    mask-size: var(--cover-size);
+    opacity: 0.35;
+    transform: rotate(var(--cover-rotate));
+    transition: background-color 600ms ease;
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, transparent 35%, color-mix(in srgb, var(--cover-fill) 22%, var(--color-surface)) 100%);
+  }
+  .cover-initials {
+    position: absolute;
+    left: 1.5rem;
+    bottom: 1rem;
+    z-index: 1;
+    font-size: clamp(3rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    color: var(--cover-ink);
+    transition: color 600ms ease;
+  }
+</style>

@@ -7,7 +7,7 @@ $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Drawing
 
 $root = Split-Path -Parent $PSScriptRoot
-$config = Get-Content (Join-Path $root 'src/site.config.ts') -Raw
+$config = Get-Content (Join-Path $root 'src/site.config.ts') -Raw -Encoding UTF8
 $name = [regex]::Match($config, "name:\s*'([^']+)'").Groups[1].Value
 $role = [regex]::Match($config, "role:\s*'([^']+)'").Groups[1].Value
 $initial = $name.Substring(0, 1).ToUpper()

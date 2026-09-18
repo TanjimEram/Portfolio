@@ -7,14 +7,15 @@
  *   npm run fetch:github -- --dry-run  # list only, write nothing
  *
  * - Skips forks and archived repos.
- * - Never overwrites an existing file (manual edits win).
+ * - Never overwrites an existing file (manual edits win), and skips repos that an existing
+ *   project file already links to via `repo:` (so hand-written slugs like `athena.md` aren't re-drafted).
  * - Uses `gh` if available (higher rate limit), else the public REST API.
  *   Set GITHUB_TOKEN to authenticate REST calls.
  *
  * One-time/occasional draft generator — not a build-time dependency.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const root = resolve(import.meta.dirname, '..');
@@ -85,8 +86,21 @@ function toMarkdown(repo, tech) {
   return lines.filter((l) => l !== null).join('\n');
 }
 
+/** Repo URLs already referenced by a project file (any slug) */
+function referencedRepos() {
+  if (!existsSync(outDir)) return new Set();
+  const urls = new Set();
+  for (const f of readdirSync(outDir)) {
+    if (!f.endsWith('.md')) continue;
+    const m = readFileSync(resolve(outDir, f), 'utf8').match(/^repo:\s*["']?([^"'\s]+)/m);
+    if (m) urls.add(m[1].replace(/\/$/, '').toLowerCase());
+  }
+  return urls;
+}
+
 const repos = await api(`/users/${user}/repos?per_page=100&type=owner&sort=updated`);
 const kept = repos.filter((r) => !r.fork && !r.archived);
+const referenced = referencedRepos();
 
 const rows = [];
 let written = 0;
@@ -98,7 +112,7 @@ for (const repo of kept) {
   const file = resolve(outDir, `${repo.name}.md`);
   let status;
 
-  if (existsSync(file)) {
+  if (existsSync(file) || referenced.has(repo.html_url.toLowerCase())) {
     status = 'exists';
     skipped++;
   } else if (dryRun) {
@@ -112,8 +126,8 @@ for (const repo of kept) {
 
   rows.push({
     name: repo.name,
-    description: repo.description ?? '',
-    language: repo.language ?? '',
+    description: (repo.description ?? '').slice(0, 60),
+    tech: tech.join(', '),
     live: repo.homepage ?? '',
     status,
   });

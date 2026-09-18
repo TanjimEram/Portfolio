@@ -33,13 +33,21 @@ export interface SiteConfig {
   hero: {
     /** Small mono label above the name */
     eyebrow: string;
-    /** Filename inside src/assets (e.g. "portrait.jpg"); omit for the placeholder silhouette */
+    /** Short paragraph under the role line */
+    intro: string;
+    /**
+     * Cut-out portrait (transparent PNG) as a path under /public — `scripts/process-images.py` makes it.
+     * A `.webp` sibling and a `-sm.webp` (phone) sibling are used when they exist. Omit for the placeholder silhouette.
+     */
     portrait?: string;
-    /** Optional sketched version, swapped in by the long-hover discovery; without it a line-art filter is used */
-    portraitSketch?: string;
     portraitAlt: string;
     cta: { label: string; href: string };
+    /** Label of the resume button */
+    resumeLabel: string;
   };
+
+  /** Handwritten signature as a path under /public to an SVG (one <path>, see scripts/process-images.py). Shown under the portrait and in the footer. */
+  signature?: string;
 
   /** Numbers worth showing. Rendered with a count-up; value is the final number */
   stats: { value: number; suffix?: string; label: string }[];
@@ -79,6 +87,9 @@ export interface SiteConfig {
   /** Skills: grouped plain lists — no bars, no percentages */
   skills: Record<string, string[]>;
 
+  /** Contact section: one plain line above the email */
+  contact: { line: string };
+
   /** Education, most recent first */
   education: {
     degree: string;
@@ -115,7 +126,7 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   name: 'Tanjim Eram',
-  role: 'CSE undergraduate at North South University (3rd year): web developer & designer',
+  role: 'Software engineer · Web developer · Artist',
   email: 'eramtanjim@gmail.com',
   location: 'Dhaka, Bangladesh',
   links: {
@@ -124,15 +135,19 @@ export const siteConfig: SiteConfig = {
   },
   hero: {
     eyebrow: 'Portfolio · Dhaka, Bangladesh',
-    // portrait: 'portrait.jpg',
-    portraitAlt: 'Portrait of Tanjim Eram',
+    intro:
+      'I build software and websites that solve real problems — usually mine first. Fourth-year CSE student at North South University, based in Dhaka, open to internships and part-time work.',
+    portrait: '/images/profile/tanjim.png',
+    portraitAlt: 'Tanjim Eram in a black suit, cut out against the accent disc',
     cta: { label: 'View projects', href: '#projects' },
+    resumeLabel: 'Download resume',
   },
+  signature: '/images/signature.svg',
 
   stats: [
     { value: 2000, suffix: '+', label: 'Orders fulfilled at XeroHour' },
-    { value: 5600, suffix: '+', label: 'Followers grown' },
-    { value: 50, suffix: '+', label: 'Art competition podiums' },
+    { value: 5600, suffix: '+', label: 'Followers grown organically' },
+    { value: 50, suffix: '+', label: 'Art competition podium finishes' },
   ],
 
   resume: '/resume.pdf',
@@ -140,7 +155,8 @@ export const siteConfig: SiteConfig = {
 
   seo: {
     title: 'Tanjim Eram',
-    description: 'Web developer & designer. CSE undergraduate at North South University, Dhaka.',
+    description:
+      'Software engineer, web developer and artist. Fourth-year CSE student at North South University, Dhaka — open to internships and part-time work.',
     url: '',
     lang: 'en',
     locale: 'en_US',
@@ -166,17 +182,21 @@ export const siteConfig: SiteConfig = {
   pattern: 'halftone',
   sectionPatterns: {},
 
-  // TODO: replace placeholder copy
   about: [
-    'Placeholder: first sentence about what you build.',
-    'Placeholder: second sentence about how you work.',
-    'Placeholder: third sentence about what you are looking for.',
+    "I build things. Software, websites, anything technical that solves a problem — and the problem is usually my own first. Athena started because I wanted a voice assistant for my laptop. Goyenda started because my friends and I wanted something to do together that wasn't scrolling on our phones.",
+    "I've been drawing since I was a kid — over 50 competitions, including the Toyota Dream Car Art Contest — so I care about how a thing looks, not just whether it runs. Football taught me the other half: you keep going when the plan isn't working, and you finish the match.",
+    "Right now I'm in my fourth year of CSE at North South University, getting Goyenda ready to launch, and looking for an internship or part-time work in Dhaka. If you're hiring, or you want a site built, my inbox is open.",
   ],
 
   skills: {
-    Web: ['HTML', 'CSS', 'JavaScript', 'Python', 'Node.js', 'WordPress'],
-    Design: ['Figma', 'Canva', 'UI/UX'],
-    Tools: ['Power BI', 'Microsoft 365', 'CapCut', 'PowerPoint'],
+    Web: ['HTML', 'CSS', 'JavaScript', 'TypeScript', 'Next.js', 'WordPress', 'Elementor'],
+    Software: ['Python', 'Flask', 'PostgreSQL', 'Supabase', 'Google Apps Script', 'Voice & speech APIs', 'Automation scripting'],
+    Design: ['Figma', 'Canva', 'UI/UX', 'Illustration'],
+    Tools: ['Git', 'Power BI', 'Microsoft 365', 'CapCut'],
+  },
+
+  contact: {
+    line: 'Open to internships and part-time work in Dhaka. Also available for freelance site builds.',
   },
 
   education: [

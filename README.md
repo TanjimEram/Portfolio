@@ -36,20 +36,26 @@ Node **22.12+** is required (see `engines` in `package.json`).
 | -------------------- | -------------------------------------------------------------------------------------------- |
 | `name`, `role`       | Hero headline and one-line intro                                                             |
 | `email`, `location`, `links` | Contact details; GitHub URL also drives `fetch:github`                                |
-| `hero`               | Eyebrow label, portrait filename, CTA                                                        |
+| `hero`               | Eyebrow label, intro paragraph, cut-out portrait path, CTA and resume button labels           |
+| `signature`          | Path to the traced signature SVG (hero + footer discovery)                                   |
 | `stats`              | Numbers for the count-up strip under the hero                                                |
 | `resume`, `resumeFilename` | Path under `public/` and the filename offered on download                              |
 | `seo`                | Title, description, canonical `url`, OG image, locale                                        |
 | `nav`                | Header links                                                                                 |
 | `sections`           | Home-page section **order**; set `enabled: false` to hide one                                |
 | `pattern`, `sectionPatterns` | Site background pattern, and optional per-section overrides                         |
-| `about`, `skills`, `education` | Plain copy and grouped lists                                                       |
+| `about`, `skills`, `education`, `contact` | Plain copy and grouped lists                                            |
 | `features`           | Flags reserved for later modules — keep `false` unless the module exists                     |
 
 Then:
 
-- **Portrait:** drop a photo into `src/assets/` (e.g. `portrait.jpg`) and set `hero.portrait: 'portrait.jpg'`.
-  It is optimised by `astro:assets` and rendered in duotone. With no portrait, a placeholder silhouette is shown.
+- **Portrait & signature:** put `myself.heic` (or jpg/png) and `signature.heic` in `src/assets/source/`
+  (git-ignored) and run `python scripts/process-images.py`. It cuts the person out with `rembg`, writes
+  `public/images/profile/tanjim.png` + WebP variants (1200px, alpha kept), and thresholds/dilates/traces the
+  signature into `public/images/signature.svg` (+ PNG). Set `hero.portrait` and `signature` to those paths.
+  The portrait is rendered in duotone over the accent disc; the signature hangs off its bottom edge and is
+  the footer's `signature` discovery. Needs `pip install pillow-heif "rembg[cpu]" potracer scipy`
+  (sharp's prebuilt libvips can't decode HEIC). With no portrait, a placeholder silhouette is shown.
 - **Resume:** put your PDF at `public/resume.pdf`.
 - **OG image & icons:** run `powershell -ExecutionPolicy Bypass -File scripts/make-og.ps1` (Windows) to
   regenerate `public/og.png`, `apple-touch-icon.png` and `favicon.ico` from your name. `favicon.svg` is
@@ -67,13 +73,15 @@ One Markdown file per entry. Frontmatter is validated by the schemas in `src/con
 ---
 title: Project name
 summary: One line shown on the card.
-description: A longer line used for SEO and the top of the detail page.
+description: A longer line used for the page's meta description.
 tech: [Astro, TypeScript]
 repo: https://github.com/you/project     # optional
 live: https://project.example.com        # optional
 image: ./project.png                     # optional, relative to the .md file, optimised automatically
 color: '#2563eb'                         # optional hex; recolours the detail page ("chameleon")
 pattern: grid                            # optional; background pattern for the detail page (see Patterns)
+status: shipped                          # optional badge: shipped | in-development | ongoing
+statusNote: Used at every club event     # optional qualifier shown with the badge on the detail page
 featured: true                           # featured projects show on the home page
 order: 1                                 # sort key, ascending
 source: manual                           # or "github" for drafts from fetch:github
@@ -81,7 +89,8 @@ source: manual                           # or "github" for drafts from fetch:git
 Markdown body: the problem, what you built, and the outcome (numbers, screenshots, links).
 ```
 
-If no project is `featured`, the home page shows all of them.
+If no project is `featured`, the home page shows all of them. Projects without an `image` get a generated
+cover: the project colour, its pattern and its initials (`ProjectCover.astro`).
 
 **`experience/*.md`** — `org, role, type (club | venture | work), start, end?, highlights[], links[]?, order`
 
@@ -96,7 +105,8 @@ npm run fetch:github -- --dry-run    # list only
 ```
 
 Writes `src/content/projects/<repo>.md` for every public, non-fork, non-archived repo with
-`source: github` and `featured: false`. **Existing files are never overwritten**, so edits are safe.
+`source: github` and `featured: false`. **Existing files are never overwritten**, and repos already linked
+from a project file's `repo:` are skipped (so hand-named slugs aren't re-drafted) — edits are safe.
 Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a higher rate limit).
 
 ## Design system

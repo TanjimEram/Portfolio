@@ -1,14 +1,24 @@
 ---
-import { Image } from 'astro:assets';
-import type { ImageMetadata } from 'astro';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import Signature from './Signature.astro';
 import { siteConfig } from '../site.config';
 
-const { name, role, links, email, resume, hero, stats } = siteConfig;
+const { name, role, links, email, resume, resumeFilename, hero, stats, signature } = siteConfig;
 
-// Portrait lives in src/assets so astro:assets can optimise it; missing file → silhouette placeholder.
-const assets = import.meta.glob<{ default: ImageMetadata }>('../assets/*.{jpg,jpeg,png,webp,avif}', { eager: true });
-const portrait = hero.portrait ? assets[`../assets/${hero.portrait}`]?.default : undefined;
-const sketch = hero.portraitSketch ? assets[`../assets/${hero.portraitSketch}`]?.default : undefined;
+// Cut-out portrait under /public (scripts/process-images.py): PNG with alpha, plus optional WebP siblings.
+const pub = (p: string) => resolve(process.cwd(), 'public', p.replace(/^\//, ''));
+const pngSize = (p: string) => {
+  // IHDR: width/height are the two big-endian uint32s at bytes 16–24 of a PNG
+  const b = readFileSync(pub(p));
+  return { width: b.readUInt32BE(16), height: b.readUInt32BE(20) };
+};
+const portrait = hero.portrait && existsSync(pub(hero.portrait)) ? hero.portrait : undefined;
+const webp = portrait?.replace(/\.png$/, '.webp');
+const webpSm = portrait?.replace(/\.png$/, '-sm.webp');
+const sizes = portrait ? pngSize(portrait) : undefined;
+const hasWebp = !!webp && existsSync(pub(webp));
+const hasWebpSm = !!webpSm && existsSync(pub(webpSm));
 
 const iconClass = 'size-5';
 ---
@@ -21,6 +31,7 @@ const iconClass = 'size-5';
         {name}<span class="text-accent" aria-hidden="true">.</span>
       </h1>
       <p class="mt-6 max-w-[46ch] text-lg text-muted sm:text-xl" data-reveal>{role}</p>
+      <p class="mt-4 max-w-[52ch] text-muted" data-reveal>{hero.intro}</p>
 
       <div class="hero-actions mt-9 flex flex-wrap items-center gap-x-6 gap-y-4" data-reveal>
         <a href={hero.cta.href} class="group inline-flex items-center gap-3 font-semibold">
@@ -29,7 +40,7 @@ const iconClass = 'size-5';
           </span>
           {hero.cta.label}
         </a>
-        <a href={resume} class="btn-outline" target="_blank" rel="noopener" type="application/pdf">Resume</a>
+        <a href={resume} class="btn-outline" download={resumeFilename} type="application/pdf">{hero.resumeLabel}</a>
 
         <ul class="flex items-center gap-1">
           <li>
@@ -51,36 +62,39 @@ const iconClass = 'size-5';
       </div>
     </div>
 
-    {/* Portrait over a big accent disc that bleeds off the right edge */}
+    {/* Cut-out portrait standing on a big accent disc; the signature hangs off its bottom edge */}
     <div class="portrait-wrap relative mx-auto w-full max-w-sm lg:max-w-none" data-reveal>
-      <div class="portrait-disc" aria-hidden="true"></div>
-      <div class="portrait relative aspect-[4/5] overflow-hidden rounded-[var(--radius-card)]">
-        {
-          portrait ? (
-            <Image
-              src={portrait}
-              alt={hero.portraitAlt}
-              widths={[400, 640, 960]}
-              sizes="(min-width: 1024px) 40vw, (min-width: 640px) 384px, 90vw"
-              class="h-full w-full object-cover"
-              loading="eager"
-              fetchpriority="high"
-            />
-          ) : (
-            <svg class="h-full w-full" viewBox="0 0 400 500" role="img" aria-label="Portrait placeholder">
-              <rect width="400" height="500" fill="#2a2a2e" />
-              <circle cx="200" cy="190" r="80" fill="#a1a1aa" />
-              <path d="M60 500c0-110 62-170 140-170s140 60 140 170Z" fill="#a1a1aa" />
-            </svg>
-          )
-        }
-        {
-          sketch && (
-            <Image src={sketch} alt="" widths={[400, 640, 960]} sizes="(min-width: 1024px) 40vw, (min-width: 640px) 384px, 90vw" class="portrait-sketch" loading="lazy" />
-          )
-        }
-        <div class="duotone" aria-hidden="true"></div>
+      <div class="portrait relative aspect-[4/5]">
+        <div class="portrait-disc" aria-hidden="true"></div>
+        <div class="portrait-clip">
+          {
+            portrait && sizes ? (
+              <picture>
+                {hasWebpSm && <source media="(max-width: 639px)" srcset={webpSm} type="image/webp" />}
+                {hasWebp && <source srcset={webp} type="image/webp" />}
+                <img
+                  src={portrait}
+                  alt={hero.portraitAlt}
+                  width={sizes.width}
+                  height={sizes.height}
+                  class="portrait-img"
+                  loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
+                />
+              </picture>
+            ) : (
+              <svg class="portrait-img" viewBox="0 0 400 500" role="img" aria-label="Portrait placeholder">
+                <circle cx="200" cy="150" r="80" fill="#a1a1aa" />
+                <path d="M60 500c0-110 62-170 140-170s140 60 140 170Z" fill="#a1a1aa" />
+              </svg>
+            )
+          }
+          {/* duotone: accent multiplied over the grayscale photo, masked to the cut-out so the disc stays clean */}
+          <div class="duotone" aria-hidden="true" style={hasWebp ? `--portrait-mask: url(${webp})` : portrait ? `--portrait-mask: url(${portrait})` : undefined}></div>
+        </div>
       </div>
+      {signature && <Signature class="hero-signature" aria-hidden="true" />}
     </div>
   </div>
 
@@ -105,12 +119,16 @@ const iconClass = 'size-5';
 </section>
 
 <style>
-  /* Diameter = portrait height, so it only ever bleeds sideways (off the viewport edge), never above/below */
+  .portrait-wrap {
+    /* room for the signature hanging below the disc */
+    padding-bottom: 12%;
+  }
+  /* Disc: diameter = column width, sitting on the bottom edge; the head rises above it */
   .portrait-disc {
     position: absolute;
-    top: 0;
+    left: 0;
+    right: 0;
     bottom: 0;
-    right: -28%;
     aspect-ratio: 1;
     border-radius: 9999px;
     /* colour via background-color so it transitions; the gradient only adds a soft highlight */
@@ -119,19 +137,29 @@ const iconClass = 'size-5';
     opacity: 0.92;
     transition: background-color 600ms ease;
   }
-  @media (width >= 64rem) {
-    .portrait-disc {
-      right: -38%;
-    }
-  }
-  /* Duotone: grayscale image + accent multiply → black-to-accent */
-  .portrait {
+  /* The photo is cut off at the legs; clipping its box to the disc's lower half hides that flat edge */
+  .portrait-clip {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 0 0 50% 50% / 0 0 40% 40%; /* aspect 4/5: half the width = 40% of the height */
     isolation: isolate;
-    background: var(--color-surface);
   }
-  .portrait :global(img),
-  .portrait svg {
+  .portrait-clip picture,
+  .portrait-clip :global(.portrait-img) {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .portrait-clip :global(img.portrait-img) {
+    object-fit: contain;
+    object-position: 50% 100%;
     filter: grayscale(1) contrast(1.05);
+  }
+  .portrait-clip svg.portrait-img {
+    filter: grayscale(1);
   }
   .duotone {
     position: absolute;
@@ -139,29 +167,71 @@ const iconClass = 'size-5';
     background: var(--color-accent);
     mix-blend-mode: multiply; /* dark theme: black → accent */
     transition: background-color 600ms ease;
+    /* the same cut-out as a mask, so only the person is tinted */
+    mask-image: var(--portrait-mask);
+    mask-size: contain;
+    mask-position: 50% 100%;
+    mask-repeat: no-repeat;
   }
-  /* long-hover discovery: a provided sketch cross-fades in; otherwise the photo becomes line art */
-  .portrait :global(.portrait-sketch) {
-    position: absolute;
-    inset: 0;
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity 600ms ease;
+  .duotone:not([style]) {
+    /* placeholder silhouette: no mask available, keep the tint off */
+    display: none;
   }
-  .portrait.is-sketch :global(.portrait-sketch) {
-    opacity: 1;
-  }
-  .portrait.is-sketch:not(:has(.portrait-sketch)) :global(img),
-  .portrait.is-sketch:not(:has(.portrait-sketch)) svg {
+  /* long-hover discovery: the photo becomes line art */
+  .portrait.is-sketch :global(.portrait-img) {
     filter: url(#sketch-ink);
   }
-  .portrait.is-sketch:not(:has(.portrait-sketch)) .duotone {
-    mix-blend-mode: multiply;
+  .portrait.is-sketch .duotone {
     opacity: 0.85;
   }
-  :global(:root[data-theme='light']) .duotone {
-    mix-blend-mode: screen; /* light theme: accent → white, so the portrait reads light like the page */
+  /* light theme keeps multiply too: `screen` would turn the dark suit accent-coloured and lose it against the disc */
+
+  /* Signature: below the portrait, overlapping the disc's bottom edge, tilted, ~40% of the portrait width */
+  .hero-signature {
+    position: absolute;
+    left: 50%;
+    bottom: 3%;
+    width: 40%;
+    height: auto;
+    transform: translateX(-42%) rotate(-5deg);
+    color: var(--color-accent);
+    transition: color 600ms ease;
+    pointer-events: none;
   }
+  /* a hairline stroke keeps the thin strokes legible at this size on any screen */
+  .hero-signature :global(path) {
+    stroke: currentColor;
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+  /* Full Experience: it writes itself once on load */
+  :global(html.js[data-experience='full']) .hero-signature :global(path) {
+    stroke-dasharray: 1;
+    animation:
+      sig-draw 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s both,
+      sig-fill 0.5s ease 1.7s both;
+  }
+  @keyframes sig-draw {
+    from {
+      stroke-dashoffset: 1;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes sig-fill {
+    from {
+      fill-opacity: 0;
+    }
+    to {
+      fill-opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-signature :global(path) {
+      animation: none !important;
+    }
+  }
+  /* On phones the portrait stacks under the text with the stats row below it, so there is room for the
+     signature at every width; hide it only if the portrait itself is ever hidden. */
 </style>

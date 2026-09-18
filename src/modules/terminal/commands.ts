@@ -12,6 +12,8 @@ export interface Project {
   repo: string | null;
   live: string | null;
   featured: boolean;
+  /** e.g. "Shipped — used across NSU MiBC events" */
+  status: string | null;
 }
 export interface TerminalData {
   user: string;
@@ -114,6 +116,7 @@ export function run(data: TerminalData, input: string, opts: { narrow?: boolean 
           p.summary,
           '',
           `stack:  ${p.tech.join(', ') || '—'}`,
+          ...(p.status ? [`status: ${p.status}`] : []),
           `page:   /projects/${p.id}/`,
           ...(p.live ? [`live:   ${p.live}`] : []),
           ...(p.repo ? [`repo:   ${p.repo}`] : []),

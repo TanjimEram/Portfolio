@@ -21,6 +21,10 @@ const projects = defineCollection({
         .optional(),
       /** Background pattern for the detail page; defaults to site.config `pattern` */
       pattern: z.enum(patternNames).optional(),
+      /** Card badge: Shipped / In development / Ongoing */
+      status: z.enum(['shipped', 'in-development', 'ongoing']).optional(),
+      /** Short qualifier shown next to the status on the detail page, e.g. "Hosting has since expired" */
+      statusNote: z.string().optional(),
       featured: z.boolean().default(false),
       order: z.number().default(0),
       source: z.enum(['github', 'manual']).default('manual'),

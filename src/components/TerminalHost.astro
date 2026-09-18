@@ -7,7 +7,7 @@
  */
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../site.config';
-import { getOrderedProjects } from '../lib/projects';
+import { getOrderedProjects, statusLabels } from '../lib/projects';
 
 interface Props {
   /** Open the terminal immediately (dev page) */
@@ -23,6 +23,7 @@ const projects = (await getOrderedProjects()).map((p) => ({
   repo: p.data.repo ?? null,
   live: p.data.live ?? null,
   featured: p.data.featured,
+  status: p.data.status ? [statusLabels[p.data.status], p.data.statusNote].filter(Boolean).join(' — ') : null,
 }));
 const experience = (await getCollection('experience'))
   .sort((a, b) => a.data.order - b.data.order)

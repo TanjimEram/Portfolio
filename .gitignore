@@ -40,3 +40,6 @@ desktop.ini
 .vscode/*
 !.vscode/extensions.json
 !.vscode/launch.json
+
+# original photos for scripts/process-images.py (personal; the processed outputs in public/images are committed)
+src/assets/source/

@@ -2,6 +2,7 @@
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
 import { getOrderedProjects, type Project } from '../../lib/projects';
 
 export async function getStaticPaths() {
@@ -28,11 +29,9 @@ interface Props {
 
 const { project, index, total, prev, next } = Astro.props;
 const { Content } = await render(project);
-const { title, summary, description, tech, repo, live, image, color, pattern, source } = project.data;
+const { title, summary, description, tech, repo, live, image, color, pattern, status, statusNote } = project.data;
 
 const pad = (n: number) => String(n).padStart(2, '0');
-// GitHub drafts copy the summary into description; don't print the same line twice.
-const showDescription = description.trim() !== summary.trim();
 const repoName = repo ? repo.replace(/^https?:\/\/(www\.)?github\.com\//, '') : undefined;
 const liveHost = live ? new URL(live).host : undefined;
 ---
@@ -76,6 +75,17 @@ const liveHost = live ? new URL(live).host : undefined;
 
       {/* facts panel */}
       <dl class="card facts grid gap-5 p-6 text-sm sm:grid-cols-2 lg:grid-cols-1" data-reveal>
+        {
+          status && (
+            <div>
+              <dt class="label-mono">Status</dt>
+              <dd class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <StatusBadge status={status} />
+                {statusNote && <span class="text-muted">{statusNote}</span>}
+              </dd>
+            </div>
+          )
+        }
         <div>
           <dt class="label-mono">Stack</dt>
           <dd class="mt-3">
@@ -112,10 +122,6 @@ const liveHost = live ? new URL(live).host : undefined;
             {!live && !repo && <span class="text-muted">—</span>}
           </dd>
         </div>
-        <div>
-          <dt class="label-mono">Source</dt>
-          <dd class="mt-3 text-muted">{source === 'github' ? 'Imported from GitHub' : 'Written by hand'}</dd>
-        </div>
         {
           color && (
             <div>
@@ -151,7 +157,6 @@ const liveHost = live ? new URL(live).host : undefined;
     <div class="mt-12 grid gap-10 sm:mt-16 lg:grid-cols-[minmax(0,60ch)_1fr]" data-reveal-group>
       <div>
         <p class="label-mono" data-reveal>About the project</p>
-        {showDescription && <p class="mt-5 text-lg text-muted" data-reveal>{description}</p>}
         <div class="prose-basic mt-5" data-reveal>
           <Content />
         </div>

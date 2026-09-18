@@ -1,0 +1,26 @@
+---
+/**
+ * Inlines the handwritten signature (`siteConfig.signature`, an SVG under /public) so CSS can colour
+ * and draw it: one <path pathLength="1"> — the footer discovery animates stroke-dashoffset then fades the fill in.
+ * Renders nothing when no signature is configured.
+ */
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import type { HTMLAttributes } from 'astro/types';
+import { siteConfig } from '../site.config';
+
+type Props = HTMLAttributes<'svg'>;
+const { class: className, ...rest } = Astro.props;
+
+const file = siteConfig.signature;
+let viewBox = '';
+let inner = '';
+if (file) {
+  // read at build time from /public (process.cwd() is the project root for `astro build` and `astro dev`)
+  const svg = readFileSync(resolve(process.cwd(), 'public', file.replace(/^\//, '')), 'utf8');
+  viewBox = svg.match(/viewBox="([^"]+)"/)?.[1] ?? '0 0 100 100';
+  inner = svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+}
+---
+
+{file && <svg class={className} viewBox={viewBox} fill="currentColor" {...rest} set:html={inner} />}

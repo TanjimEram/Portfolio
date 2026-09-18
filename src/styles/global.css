@@ -745,9 +745,11 @@ html:not([data-experience='full']) .sound-toggle {
   opacity: 0.85;
 }
 
-/* 1. signature: faint until hovered/focused, then draws itself in accent */
+/* 1. signature: faint until hovered/focused, then draws itself in accent.
+   The traced signature is one filled <path pathLength="1">: its outline draws first (stroke-dashoffset),
+   then the fill fades in. */
 .signature {
-  width: 3.25rem;
+  width: 5.5rem;
   height: auto;
   overflow: visible;
   color: var(--color-accent);
@@ -758,28 +760,34 @@ html:not([data-experience='full']) .sound-toggle {
     color 600ms ease;
 }
 .signature path {
-  fill: none;
+  fill: currentColor;
+  fill-opacity: 0;
   stroke: currentColor;
-  stroke-width: 1.6;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
   stroke-linecap: round;
   stroke-linejoin: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  transition:
+    stroke-dashoffset 1600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    fill-opacity 500ms ease 1300ms;
 }
 /* standard mode: a quiet, fully drawn, muted signature — nothing hidden, nothing to hunt */
 html:not([data-experience='full']) .signature {
-  opacity: 0.25;
+  opacity: 0.3;
   color: var(--color-muted);
 }
 html:not([data-experience='full']) .signature path {
   stroke-dashoffset: 0;
+  fill-opacity: 1;
 }
 .signature.is-drawing {
   opacity: 1;
 }
 .signature.is-drawing path {
   stroke-dashoffset: 0;
+  fill-opacity: 1;
 }
 
 /* 2. sketch mode: rough hand-drawn outlines everywhere */
@@ -791,7 +799,6 @@ html[data-sketch] .xp-toggle,
 html[data-sketch] .disc-pill,
 html[data-sketch] .disc-panel,
 html[data-sketch] .toast,
-html[data-sketch] .portrait,
 html[data-sketch] [class*='rounded-full'] {
   border: 2px solid var(--color-text) !important;
   border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
