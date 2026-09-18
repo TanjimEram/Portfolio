@@ -125,13 +125,20 @@
     transform: none;
   }
 
-  /* phones: keep the pill compact */
+  /* phones: keep the pill compact, but a full 44px tall */
   @media (width < 40rem) {
     .xp-label {
       display: none;
     }
     .xp-toggle {
-      padding: 0 0.6rem;
+      height: 2.75rem;
+      padding: 0 0.7rem;
+    }
+  }
+  @media (pointer: coarse) {
+    .xp-toggle {
+      height: 2.75rem;
+      min-width: 2.75rem;
     }
   }
   @media (prefers-reduced-motion: reduce) {

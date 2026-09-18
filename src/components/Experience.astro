@@ -15,7 +15,7 @@ const entries = (await getCollection('experience')).sort((a, b) => a.data.order 
 ---
 
 <Section id="experience" title="Experience & Leadership" label="Experience" number={number} pattern={pattern} wide>
-  <ol class="grid gap-5 lg:grid-cols-2" data-reveal-group>
+  <ol class="exp-list grid gap-5 lg:grid-cols-2" data-reveal-group>
     {entries.map((entry) => <ExperienceItem entry={entry} />)}
   </ol>
 </Section>

@@ -92,10 +92,14 @@ function initCountUp() {
     const suffix = el.dataset.suffix ?? '';
     const duration = 1200;
     const start = performance.now();
+    let last = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      el.textContent = fmt.format(Math.round(target * eased)) + suffix;
+      if (now - last > 32 || t >= 1) {
+        last = now;
+        const eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = fmt.format(Math.round(target * eased)) + suffix;
+      }
       if (t < 1) requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);

@@ -68,8 +68,9 @@ function textRect(target: Element): DOMRect {
   return target.getBoundingClientRect();
 }
 
-function place(item: (typeof items)[number]) {
-  const { el, p, target, rot } = item;
+/** Measure only (no writes) so a batch of placements causes one layout, not one per doodle */
+function measure(item: (typeof items)[number]) {
+  const { p, target, rot } = item;
   const r = textRect(target);
   const { w, h } = sizeFor(p, r);
   const left = r.left + scrollX;
@@ -94,11 +95,23 @@ function place(item: (typeof items)[number]) {
   }
   x += p.offset?.x ?? 0;
   y += p.offset?.y ?? 0;
-  el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;--doodle-rotate:${rot}deg`;
+  return `left:${x}px;top:${y}px;width:${w}px;height:${h}px;--doodle-rotate:${rot}deg`;
 }
 
+function place(item: (typeof items)[number]) {
+  item.el.style.cssText = measure(item);
+}
+
+let placeQueued = false;
+/** Reads first, then writes, once per frame — never interleaved, never more than once per frame */
 function placeAll() {
-  for (const item of items) place(item);
+  if (placeQueued) return;
+  placeQueued = true;
+  requestAnimationFrame(() => {
+    placeQueued = false;
+    const styles = items.map(measure);
+    items.forEach((item, i) => (item.el.style.cssText = styles[i]!));
+  });
 }
 
 export function mount() {
@@ -133,14 +146,14 @@ export function mount() {
     layer!.appendChild(el);
     const item = { el, p, target, rot };
     items.push(item);
-    place(item);
     if (instant) el.classList.add('is-drawn', 'is-instant');
     else io!.observe(el);
   });
+  placeAll();
 
   // Anything already on screen draws right away (IO can lag on a hidden/just-loaded tab)
   if (!instant) {
-    requestAnimationFrame(() => {
+    setTimeout(() => {
       for (const { el } of items) {
         const r = el.getBoundingClientRect();
         if (r.bottom > 0 && r.top < innerHeight && !el.classList.contains('is-drawn')) {
@@ -148,8 +161,17 @@ export function mount() {
           io?.unobserve(el);
         }
       }
-    });
+    }, 80);
   }
+
+  // touch has no hover: a tap wobbles instead
+  layer.addEventListener('click', (e) => {
+    const d = (e.target as Element).closest<SVGSVGElement>('.doodle');
+    if (!d) return;
+    d.classList.remove('is-wobble');
+    void d.getBoundingClientRect();
+    d.classList.add('is-wobble');
+  });
 
   ro = new ResizeObserver(placeAll);
   ro.observe(document.body);

@@ -1,5 +1,5 @@
 /**
- * `long-hover` — rest the pointer on the hero portrait for 3 seconds and it becomes a sketch.
+ * `long-hover` — rest the pointer on the hero portrait for 3 seconds (tap it on touch) and it becomes a sketch.
  * If `hero.portraitSketch` exists, Hero.astro renders it as a second image and the swap cross-fades;
  * otherwise `.portrait.is-sketch` applies an SVG edge/ink filter to the photo (see global.css).
  */
@@ -22,9 +22,19 @@ export const longHover: Egg = {
       }, 3000);
     };
     const stop = () => clearTimeout(timer);
-    portrait.addEventListener('pointerenter', start);
-    portrait.addEventListener('pointerleave', stop);
+    // no hover on touch: a tap toggles instead
+    const tap = () => {
+      portrait.classList.toggle('is-sketch');
+      found('long-hover');
+    };
+    const touch = matchMedia('(hover: none)').matches;
+    if (touch) portrait.addEventListener('click', tap);
+    else {
+      portrait.addEventListener('pointerenter', start);
+      portrait.addEventListener('pointerleave', stop);
+    }
     return () => {
+      portrait.removeEventListener('click', tap);
       portrait.removeEventListener('pointerenter', start);
       portrait.removeEventListener('pointerleave', stop);
       clearTimeout(timer);

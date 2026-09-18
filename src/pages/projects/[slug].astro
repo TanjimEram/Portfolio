@@ -43,7 +43,7 @@ const liveHost = live ? new URL(live).host : undefined;
     <header class="grid gap-10 lg:grid-cols-[1.35fr_0.65fr] lg:items-end lg:gap-14" data-reveal-group>
       <div>
         <p class="label-mono flex flex-wrap items-center gap-3" data-reveal>
-          <a href="/#projects" class="inline-block py-1 transition-colors hover:text-text">← Work</a>
+          <a href="/#projects" class="tap-target inline-block py-1 transition-colors hover:text-text">← Work</a>
           <span class="h-px w-6 bg-current opacity-60" aria-hidden="true"></span>
           <span>{pad(index)} / {pad(total)}</span>
         </p>
@@ -75,7 +75,7 @@ const liveHost = live ? new URL(live).host : undefined;
       </div>
 
       {/* facts panel */}
-      <dl class="card grid gap-5 p-6 text-sm sm:grid-cols-2 lg:grid-cols-1" data-reveal>
+      <dl class="card facts grid gap-5 p-6 text-sm sm:grid-cols-2 lg:grid-cols-1" data-reveal>
         <div>
           <dt class="label-mono">Stack</dt>
           <dd class="mt-3">

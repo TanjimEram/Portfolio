@@ -9,7 +9,8 @@ const { entry } = Astro.props;
 const { org, role, type, start, end, highlights, links } = entry.data;
 ---
 
-<li class="card p-6 sm:p-7" data-reveal>
+<li class="exp-item" data-reveal>
+  <div class="card p-6 sm:p-7">
   <div class="flex flex-wrap items-center justify-between gap-2 font-mono text-xs text-muted">
     <span>
       <time datetime={start}>{start}</time> – {end ? <time datetime={end}>{end}</time> : 'present'}
@@ -43,4 +44,5 @@ const { org, role, type, start, end, highlights, links } = entry.data;
       </ul>
     )
   }
+  </div>
 </li>

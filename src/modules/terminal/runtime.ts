@@ -159,7 +159,7 @@ function setup(host: HTMLElement): () => void {
     }
     hIndex = history.length;
     sound('sound:blip');
-    const res = run(data, text);
+    const res = run(data, text, { narrow: small() });
     print(res.lines);
     if (res.effect) effect(res.effect);
   };
@@ -207,6 +207,8 @@ function setup(host: HTMLElement): () => void {
   const onClick = (e: MouseEvent) => {
     if (!(e.target as Element).closest('a, button')) input.focus({ preventScroll: true });
   };
+  // soft keyboard: keep the prompt visible
+  const onFocus = () => setTimeout(() => input.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' }), 300);
 
   /* ---------- chips (small screens) ---------- */
   const buildChips = () => {
@@ -260,6 +262,7 @@ function setup(host: HTMLElement): () => void {
   host.addEventListener('click', onSwitch);
   form.addEventListener('submit', onSubmit);
   input.addEventListener('keydown', onKey);
+  input.addEventListener('focus', onFocus);
   term.addEventListener('click', onClick);
   chips?.addEventListener('click', onChip);
 
@@ -272,6 +275,7 @@ function setup(host: HTMLElement): () => void {
     host.removeEventListener('click', onSwitch);
     form.removeEventListener('submit', onSubmit);
     input.removeEventListener('keydown', onKey);
+    input.removeEventListener('focus', onFocus);
     term.removeEventListener('click', onClick);
     chips?.removeEventListener('click', onChip);
     if (view === 'terminal') setView('grid', false);

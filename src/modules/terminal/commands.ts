@@ -79,7 +79,7 @@ function pick(data: TerminalData, arg: string | undefined, cmd: string): Project
   return [`no project called "${arg}".`, ...(near ? [`did you mean: ${cmd} ${near}?`] : ['try: ls'])];
 }
 
-export function run(data: TerminalData, input: string): Result {
+export function run(data: TerminalData, input: string, opts: { narrow?: boolean } = {}): Result {
   const argv = input.trim().split(/\s+/).filter(Boolean);
   const [cmd = '', ...args] = argv;
   const arg = args[0];
@@ -94,9 +94,13 @@ export function run(data: TerminalData, input: string): Result {
       const all = args.includes('--all') || args.includes('-a');
       const list = all ? data.projects : data.projects.filter((p) => p.featured);
       const shown = list.length ? list : data.projects;
-      const lines = shown.map(
-        (p, i) => `${String(i + 1).padStart(2, '0')}  ${pad(p.id, 32)} ${p.tech.slice(0, 3).join(', ') || '—'}`,
-      );
+      // narrow screens: stack the stack under the name instead of a padded column
+      const idWidth = Math.max(...shown.map((p) => p.id.length)) + 2;
+      const lines = shown.flatMap((p, i) => {
+        const n = String(i + 1).padStart(2, '0');
+        const tech = p.tech.slice(0, 3).join(', ') || '—';
+        return opts.narrow ? [`${n}  ${p.id}`, `    ${tech}`] : [`${n}  ${pad(p.id, idWidth)}${tech}`];
+      });
       if (!all && shown.length < data.projects.length) lines.push('', `${data.projects.length - shown.length} more with ls --all`);
       return { lines };
     }

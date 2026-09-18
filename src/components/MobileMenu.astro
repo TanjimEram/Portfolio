@@ -1,0 +1,84 @@
+---
+/**
+ * Phone nav (< 640px): a 44px menu button that opens a bottom sheet with the section links and the
+ * theme / sound toggles, so the top bar never has to cram them in. Escape, backdrop tap or a link closes it.
+ */
+import { siteConfig } from '../site.config';
+import ThemeToggle from './ThemeToggle.astro';
+import SoundToggle from './SoundToggle.astro';
+---
+
+<button
+  type="button"
+  class="msheet-btn inline-flex size-11 items-center justify-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-text"
+  aria-label="Menu"
+  aria-expanded="false"
+  aria-controls="mobile-sheet"
+  data-msheet-open
+>
+  <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" /></svg>
+</button>
+
+<div class="msheet" id="mobile-sheet" data-msheet hidden>
+  <div class="msheet-backdrop" data-msheet-close></div>
+  <div class="msheet-panel" role="dialog" aria-modal="true" aria-label="Menu" tabindex="-1">
+    <div class="msheet-handle" aria-hidden="true"></div>
+    <ul class="msheet-links">
+      {
+        siteConfig.nav.map((link) => (
+          <li>
+            <a href={link.href} data-msheet-close>{link.label}</a>
+          </li>
+        ))
+      }
+    </ul>
+    <div class="msheet-row">
+      <span class="label-mono">Theme</span>
+      <ThemeToggle />
+    </div>
+    <div class="msheet-row" data-msheet-sound>
+      <span class="label-mono">Sound</span>
+      <SoundToggle />
+    </div>
+    <button type="button" class="msheet-cancel" data-msheet-close>Close</button>
+  </div>
+</div>
+
+<script>
+  // The header's backdrop-filter makes it the containing block for fixed children, so the sheet
+  // is moved to <body> once the page is ready (and again after every view transition).
+  const portal = () => {
+    const sheet = document.querySelector<HTMLElement>('header [data-msheet]');
+    if (sheet) document.body.appendChild(sheet);
+  };
+  portal();
+  document.addEventListener('astro:page-load', portal);
+
+  const open = (on: boolean) => {
+    const sheet = document.querySelector<HTMLElement>('[data-msheet]');
+    const btn = document.querySelector<HTMLElement>('[data-msheet-open]');
+    if (!sheet || !btn) return;
+    if (on) {
+      sheet.hidden = false;
+      requestAnimationFrame(() => sheet.classList.add('is-open'));
+      btn.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';
+      sheet.querySelector<HTMLElement>('.msheet-panel')?.focus();
+    } else {
+      sheet.classList.remove('is-open');
+      btn.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      setTimeout(() => (sheet.hidden = true), 250);
+      btn.focus();
+    }
+  };
+  document.addEventListener('click', (e) => {
+    const t = e.target as Element;
+    if (t.closest('[data-msheet-open]')) open(true);
+    else if (t.closest('[data-msheet-close]')) open(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.querySelector('[data-msheet].is-open')) open(false);
+  });
+  document.addEventListener('astro:before-swap', () => (document.body.style.overflow = ''));
+</script>

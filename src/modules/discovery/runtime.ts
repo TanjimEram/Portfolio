@@ -49,7 +49,7 @@ function makePill(): HTMLButtonElement {
   b.setAttribute('aria-haspopup', 'dialog');
   b.setAttribute('aria-expanded', 'false');
   b.innerHTML = `${GLASS}<span class="disc-num"><span class="disc-roll">${count()}</span></span><span class="disc-of"> / ${total()}</span><span class="disc-word"> found</span>`;
-  b.setAttribute('aria-label', `${count()} of ${total()} discoveries found. Open list.`);
+  b.setAttribute('aria-label', `${count()} / ${total()} found — open the list of discoveries`);
   b.addEventListener('click', () => togglePanel());
   return b;
 }
@@ -89,7 +89,7 @@ function rollTo(n: number) {
 function celebrate(label: string, n: number) {
   if (!pill) return;
   rollTo(n);
-  pill.setAttribute('aria-label', `${n} of ${total()} discoveries found. Open list.`);
+  pill.setAttribute('aria-label', `${n} / ${total()} found — open the list of discoveries`);
   pill.classList.remove('is-pop');
   void pill.offsetWidth;
   pill.classList.add('is-pop');

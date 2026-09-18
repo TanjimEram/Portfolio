@@ -24,7 +24,7 @@ const throttled = (fn: () => void) => {
 let enabled = false;
 export const setEnabled = (on: boolean) => {
   enabled = on;
-  if (on) synth.unlock();
+  // the AudioContext itself is created on the first real gesture (below), not here
 };
 
 // A restored "on" runs without a gesture, and hover isn't one: unlock on the first real interaction.

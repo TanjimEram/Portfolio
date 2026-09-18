@@ -59,6 +59,12 @@ const patternOptions = patternNames.map((name) => {
     border: 0;
     background: none;
   }
+  /* dev tool: never on phones (it is 700px wide and would force a horizontal layout) */
+  @media (width < 48rem) {
+    .dev-accent {
+      display: none;
+    }
+  }
   .dev-accent .reset {
     color: var(--color-muted);
     padding-inline: 0.3rem;

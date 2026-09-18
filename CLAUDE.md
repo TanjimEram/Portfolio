@@ -76,6 +76,20 @@ public/
 7. **Contact**: email + links, simple
 8. Footer
 
+## Mobile rules
+Phones are a first-class target, not a fallback. Test at **360, 390 and 768px** (Chrome device emulation, touch on) before calling anything done. **Every new module must define its mobile behaviour** (what it does on touch, on a narrow column, and under a soft keyboard) before it is considered finished — "hidden on mobile" is an acceptable answer only if it is explicit.
+
+Checklist (run it on every page and every module):
+- No horizontal scroll: `document.documentElement.scrollWidth === innerWidth` at all three widths. Watch oversized type, fixed/absolute decorations, padded mono tables and anything wider than the nav.
+- Tap targets ≥ 44×44px on any coarse pointer (`@media (pointer: coarse)` rules in `global.css`), with spacing; stretched card links count as the whole card.
+- Text ≥ 15px for copy and ≥ 14px for mono/meta labels on phones (`.text-sm`/`.text-xs`/`.label-mono` overrides live in `global.css` under `(width < 40rem)`).
+- Anything that only reveals on hover needs a tap equivalent (doodle wobble → tap, long-hover portrait → tap, card lift → none needed).
+- Nav: phone bar holds only the logo, the discoveries counter, the Full Experience dot and the menu button; links and toggles go in the bottom sheet (`MobileMenu.astro`). Nothing new is added to the phone top bar.
+- Fixed elements must not cover content: the discoveries pill docks into the nav slot below 640px; toasts sit above the safe area; nothing floats over the terminal input when the keyboard opens (the input scrolls itself into view).
+- Modules: doodles only render placements with `mobile: true` below 768px; cursor dot only on `pointer: fine`; hover sounds only on `hover: hover`; terminal shows tap chips below 768px; background uses one pattern layer, no glow drift and no backdrop blur below 768px.
+- Reduced motion and touch are independent: check both.
+- Lighthouse mobile on the production build: performance ≥ 90 in standard *and* full mode, accessibility 100. Layout reads and writes in modules must be batched (see `doodles/mount.ts`) — interleaving them cost 900ms of TBT once.
+
 ## Working rules
 - Build one section at a time; run `npm run dev` and check before moving on.
 - Run `npm run build` before committing; fix all type/build errors.

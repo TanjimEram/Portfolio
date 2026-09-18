@@ -447,6 +447,7 @@ html:not([data-experience='full']) .sound-toggle {
 }
 #doodle-layer .doodle {
   position: absolute;
+  pointer-events: auto;
 }
 
 .doodle {
@@ -582,11 +583,12 @@ html:not([data-experience='full']) .sound-toggle {
 }
 .disc-num {
   position: relative;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   min-width: 1ch;
-  height: 1.2em;
+  height: 1.4em;
   overflow: hidden;
-  vertical-align: bottom;
+  line-height: 1;
 }
 .disc-roll {
   display: block;
@@ -1118,9 +1120,6 @@ section[data-view] {
   color: var(--color-accent-contrast);
 }
 @media (width < 48rem) {
-  .term-row {
-    display: none;
-  }
   .term-chips {
     display: flex;
   }
@@ -1136,5 +1135,264 @@ section[data-view] {
   }
   .term-caret {
     animation: none;
+  }
+}
+
+/* ---------- mobile pass (see CLAUDE.md "Mobile rules") ---------- */
+
+/* phone bottom sheet (MobileMenu.astro) */
+.msheet {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+}
+.msheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 250ms ease;
+}
+.msheet-panel {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0.5rem 1.5rem calc(1.25rem + env(safe-area-inset-bottom));
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.msheet.is-open .msheet-backdrop {
+  opacity: 1;
+}
+.msheet.is-open .msheet-panel {
+  transform: none;
+}
+.msheet-handle {
+  width: 2.5rem;
+  height: 0.25rem;
+  margin: 0.25rem auto 0.75rem;
+  border-radius: 9999px;
+  background: var(--color-border);
+}
+.msheet-links a {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border-bottom: 1px solid var(--color-border);
+}
+.msheet-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+/* the sheet's sound toggle should show even though the nav one is hidden outside full mode */
+html:not([data-experience='full']) .msheet-row[data-msheet-sound] {
+  display: none;
+}
+.msheet-cancel {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  font-weight: 600;
+}
+@media (prefers-reduced-motion: reduce) {
+  .msheet-backdrop,
+  .msheet-panel {
+    transition: none;
+  }
+}
+
+@media (width < 40rem) {
+  /* gutters */
+  .container-wide,
+  .container-narrow {
+    padding-inline: 1.5rem;
+  }
+
+  /* readable minimums: small text 15px, mono/meta labels 14px */
+  .text-sm {
+    font-size: 0.9375rem;
+  }
+  .text-xs,
+  .label-mono {
+    font-size: 0.875rem;
+  }
+  .xp-toggle,
+  .disc-pill {
+    font-size: 0.8125rem;
+  }
+  .btn-outline,
+  .btn-solid {
+    font-size: 0.9375rem;
+  }
+
+  /* hero: stacked full-width actions, smaller portrait, name never wider than the column */
+  .display-name {
+    font-size: clamp(2.6rem, 13vw, 4rem);
+    overflow-wrap: anywhere;
+  }
+  .hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .hero-actions > a {
+    justify-content: center;
+    min-height: 3rem;
+  }
+  .hero-actions > ul {
+    justify-content: center;
+    margin-left: 0;
+  }
+  .portrait-wrap {
+    max-width: 18rem;
+  }
+
+  /* touch targets: 44px minimum on everything tappable */
+  .btn-outline,
+  .btn-solid {
+    min-height: 2.75rem;
+  }
+  .xp-toggle,
+  .disc-pill.in-nav {
+    height: 2.75rem;
+  }
+  .term-switch button,
+  .term-chips button {
+    min-height: 2.75rem;
+    padding-inline: 0.75rem;
+  }
+  .tap-target {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .card .z-10 a,
+  footer a,
+  .disc-close {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+  }
+  .disc-close {
+    width: 2.75rem;
+  }
+
+  /* experience: a rail on the far left with the cards beside it */
+  .exp-list {
+    position: relative;
+    padding-left: 1.25rem;
+    border-left: 1px solid var(--color-border);
+  }
+  .exp-item {
+    position: relative;
+  }
+  .exp-item::before {
+    content: '';
+    position: absolute;
+    left: calc(-1.25rem - 4.5px);
+    top: 1.6rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-bg);
+  }
+
+  /* discovery panel sits under the header, never over the sheet */
+  .disc-panel {
+    width: calc(100vw - 3rem);
+  }
+}
+
+/* performance on small screens: one pattern layer, no glow drift, no backdrop blur */
+@media (width < 48rem) {
+  .fx-pattern > b {
+    display: none;
+  }
+  .fx-glow {
+    animation: none !important;
+  }
+  :root {
+    --card-blur: 0px;
+  }
+  .card {
+    background: var(--color-surface);
+  }
+  /* terminal: chips AND the input; the input scrolls itself into view on focus */
+  .term-row {
+    display: flex;
+    margin-top: 0.75rem;
+  }
+  .term-input {
+    font-size: 16px; /* prevents iOS zoom-on-focus */
+    min-height: 2.75rem;
+  }
+}
+
+/* doodle tap wobble (touch has no hover) */
+.doodle.is-wobble {
+  animation: doodle-wobble 300ms ease-in-out;
+}
+
+/* touch targets on any coarse pointer (tablets included), not only narrow screens */
+@media (pointer: coarse) {
+  .btn-outline,
+  .btn-solid {
+    min-height: 2.75rem;
+  }
+  .xp-toggle,
+  .disc-pill {
+    height: 2.75rem;
+    min-width: 2.75rem;
+  }
+  .sound-toggle,
+  [data-theme-toggle],
+  .msheet-btn {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+  .term-switch button,
+  .term-chips button {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding-inline: 0.75rem;
+  }
+  .term-input {
+    min-height: 2.75rem;
+    font-size: 16px;
+  }
+  .tap-target,
+  .card .z-10 a,
+  footer a,
+  .disc-close,
+  .disc-list a,
+  .facts a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding-inline: 0.25rem;
+    margin-inline: -0.25rem;
+  }
+  footer a {
+    padding-inline: 0.5rem;
+    margin-inline: -0.5rem;
+  }
+  .disc-close {
+    width: 2.75rem;
+    margin: 0;
+    justify-content: center;
+  }
+  header nav a {
+    min-height: 2.75rem;
   }
 }
