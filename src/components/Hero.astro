@@ -8,6 +8,7 @@ const { name, role, links, email, resume, hero, stats } = siteConfig;
 // Portrait lives in src/assets so astro:assets can optimise it; missing file → silhouette placeholder.
 const assets = import.meta.glob<{ default: ImageMetadata }>('../assets/*.{jpg,jpeg,png,webp,avif}', { eager: true });
 const portrait = hero.portrait ? assets[`../assets/${hero.portrait}`]?.default : undefined;
+const sketch = hero.portraitSketch ? assets[`../assets/${hero.portraitSketch}`]?.default : undefined;
 
 const iconClass = 'size-5';
 ---
@@ -73,6 +74,11 @@ const iconClass = 'size-5';
             </svg>
           )
         }
+        {
+          sketch && (
+            <Image src={sketch} alt="" widths={[400, 640, 960]} sizes="(min-width: 1024px) 40vw, (min-width: 640px) 384px, 90vw" class="portrait-sketch" loading="lazy" />
+          )
+        }
         <div class="duotone" aria-hidden="true"></div>
       </div>
     </div>
@@ -133,6 +139,27 @@ const iconClass = 'size-5';
     background: var(--color-accent);
     mix-blend-mode: multiply; /* dark theme: black → accent */
     transition: background-color 600ms ease;
+  }
+  /* long-hover discovery: a provided sketch cross-fades in; otherwise the photo becomes line art */
+  .portrait :global(.portrait-sketch) {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 600ms ease;
+  }
+  .portrait.is-sketch :global(.portrait-sketch) {
+    opacity: 1;
+  }
+  .portrait.is-sketch:not(:has(.portrait-sketch)) :global(img),
+  .portrait.is-sketch:not(:has(.portrait-sketch)) svg {
+    filter: url(#sketch-ink);
+  }
+  .portrait.is-sketch:not(:has(.portrait-sketch)) .duotone {
+    mix-blend-mode: multiply;
+    opacity: 0.85;
   }
   :global(:root[data-theme='light']) .duotone {
     mix-blend-mode: screen; /* light theme: accent → white, so the portrait reads light like the page */

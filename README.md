@@ -124,6 +124,10 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   themselves on scroll. Placements are declared in `siteConfig.doodles` (`{ selector, text?, type, position, offset,
   size, rotation, mobile }`) and rendered into a document-level layer, so they never touch layout. Hidden below
   768 px unless a placement sets `mobile: true`. Review the library at `/dev/doodles` in dev.
+- **Discovery** (`src/modules/discovery/`, flag `features.easterEggs`): seven easter eggs tracked by a small store
+  (`store.ts`: `define / found / list / reset`, persisted, events `discovery:found|complete|reset`), a "n / 7 found"
+  counter with a panel, and the eggs themselves in `eggs/`. Copy lives in `siteConfig.discovery`. Trigger and reset
+  each one at `/dev/discovery` in dev.
 - **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic — a Full
   Experience module. Hovering a project card plays its note, clicking a card plays a short arpeggio, any other click
   ticks. The speaker toggle mutes; the module is only downloaded when it's needed.

@@ -59,6 +59,13 @@ document.addEventListener('doodle:draw', () => {
   synth.scratch();
 });
 
+// Discoveries: a small ding per find, a soft rising chime when everything is found
+document.addEventListener('sound:ding', () => enabled && synth.pluck(noteFor(9), { gain: 0.7, decay: 0.35 }));
+document.addEventListener('sound:chime', () => {
+  if (!enabled) return;
+  [0, 2, 4, 7].forEach((step, i) => setTimeout(() => synth.pluck(noteFor(5 + step), { gain: 0.6, decay: 0.6 }), i * 160));
+});
+
 // Click: arpeggio on project cards (then navigate), tick on nav links and buttons.
 // Capture phase so this runs before ClientRouter's own click handler, which would navigate at once.
 document.addEventListener(

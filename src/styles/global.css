@@ -529,3 +529,399 @@ html:not([data-experience='full']) .sound-toggle {
   transform: rotate(var(--pattern-rotate, 0deg));
   transition: background-color 600ms ease;
 }
+
+/* ---------- discovery (Full Experience module, src/modules/discovery) ---------- */
+
+/* counter pill: bottom-right on desktop, in the nav slot on phones */
+.disc-pill {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  height: 2.25rem;
+  padding: 0 0.85rem 0 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  background: var(--card-bg);
+  -webkit-backdrop-filter: blur(var(--card-blur));
+  backdrop-filter: blur(var(--card-blur));
+  box-shadow: var(--shadow-card);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text);
+  white-space: nowrap;
+  transition:
+    border-color 250ms ease,
+    transform 250ms ease;
+}
+.disc-pill svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: var(--color-accent-ink);
+}
+.disc-pill:hover {
+  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+.disc-pill.in-nav {
+  position: static;
+  height: 2rem;
+  padding: 0 0.55rem;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.disc-pill.in-nav .disc-word {
+  display: none;
+}
+.disc-slot:empty {
+  display: none;
+}
+.disc-num {
+  position: relative;
+  display: inline-block;
+  min-width: 1ch;
+  height: 1.2em;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+.disc-roll {
+  display: block;
+}
+.disc-roll.is-out {
+  position: absolute;
+  inset: 0;
+  animation: disc-roll-out 400ms ease forwards;
+}
+.disc-roll.is-in {
+  animation: disc-roll-in 400ms ease;
+}
+@keyframes disc-roll-out {
+  to {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+@keyframes disc-roll-in {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+.disc-pill.is-pop {
+  animation: disc-pop 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes disc-pop {
+  30% {
+    transform: scale(1.12);
+  }
+}
+.disc-ripple {
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid var(--color-accent);
+  pointer-events: none;
+  animation: disc-ripple 800ms ease-out forwards;
+}
+@keyframes disc-ripple {
+  to {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+/* panel */
+.disc-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: 3.75rem;
+  z-index: 46;
+  width: min(22rem, calc(100vw - 2rem));
+  max-height: min(70vh, 32rem);
+  overflow: auto;
+  padding: 1rem 1.1rem 1.1rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  font-size: 0.875rem;
+  animation: toast-in 220ms ease-out;
+  transition:
+    background-color 600ms ease,
+    color 600ms ease;
+}
+@media (width < 40rem) {
+  .disc-panel {
+    top: calc(var(--header-h) + 0.5rem);
+    right: 0.75rem;
+    bottom: auto;
+  }
+}
+.disc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+.disc-head strong {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+.disc-close {
+  margin-left: auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+.disc-close:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+.disc-list li {
+  display: flex;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--color-border);
+}
+.disc-list b {
+  display: block;
+  font-weight: 600;
+}
+.disc-list small {
+  display: block;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+.disc-mark {
+  width: 1.25rem;
+  flex: none;
+  text-align: center;
+}
+.disc-list .is-found .disc-mark {
+  color: var(--color-accent-ink);
+}
+.disc-list .is-locked {
+  opacity: 0.7;
+}
+.disc-list .is-locked b {
+  font-family: var(--font-mono);
+  letter-spacing: 0.15em;
+}
+.disc-complete {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid currentColor;
+  line-height: 1.5;
+}
+.disc-complete a {
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+/* everything found: the panel fills with accent */
+.disc-panel.is-complete {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+  border-color: transparent;
+}
+.disc-panel.is-complete .disc-list li {
+  border-color: color-mix(in srgb, currentColor 25%, transparent);
+}
+.disc-panel.is-complete .disc-list small,
+.disc-panel.is-complete .disc-close,
+.disc-panel.is-complete .label-mono,
+.disc-panel.is-complete .disc-mark {
+  color: inherit;
+  opacity: 0.85;
+}
+
+/* 1. signature: faint until hovered/focused, then draws itself in accent */
+.signature {
+  width: 3.25rem;
+  height: auto;
+  overflow: visible;
+  color: var(--color-accent);
+  opacity: 0.35;
+  cursor: pointer;
+  transition:
+    opacity 300ms ease,
+    color 600ms ease;
+}
+.signature path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* standard mode: a quiet, fully drawn, muted signature — nothing hidden, nothing to hunt */
+html:not([data-experience='full']) .signature {
+  opacity: 0.25;
+  color: var(--color-muted);
+}
+html:not([data-experience='full']) .signature path {
+  stroke-dashoffset: 0;
+}
+.signature.is-drawing {
+  opacity: 1;
+}
+.signature.is-drawing path {
+  stroke-dashoffset: 0;
+}
+
+/* 2. sketch mode: rough hand-drawn outlines everywhere */
+html[data-sketch] .card,
+html[data-sketch] .btn-solid,
+html[data-sketch] .btn-outline,
+html[data-sketch] .btn-circle,
+html[data-sketch] .xp-toggle,
+html[data-sketch] .disc-pill,
+html[data-sketch] .disc-panel,
+html[data-sketch] .toast,
+html[data-sketch] .portrait,
+html[data-sketch] [class*='rounded-full'] {
+  border: 2px solid var(--color-text) !important;
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px !important;
+  box-shadow: none !important;
+  filter: url(#sketch-edge);
+}
+html[data-sketch] .card {
+  background: var(--color-surface) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-sketch] .btn-solid {
+  background: transparent !important;
+  color: var(--color-text) !important;
+}
+html[data-sketch] header {
+  border-bottom: 2px solid var(--color-text);
+}
+html[data-sketch] .border-t,
+html[data-sketch] .border-b,
+html[data-sketch] .border-l {
+  border-color: var(--color-text) !important;
+}
+html[data-sketch] h1,
+html[data-sketch] h2,
+html[data-sketch] h3 {
+  filter: url(#sketch-edge);
+}
+
+/* 6. hidden note below the footer */
+.bottom-note {
+  margin: 0;
+  padding: 0 1.25rem;
+  max-height: 0;
+  overflow: hidden;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--color-accent-ink);
+  transition:
+    max-height 600ms ease,
+    padding 600ms ease;
+}
+.bottom-note.is-open {
+  max-height: 6rem;
+  padding: 2rem 1.25rem 2.5rem;
+}
+
+/* 7. the wanderer */
+.idle-walker {
+  position: fixed;
+  left: -80px;
+  bottom: 0.5rem;
+  z-index: 44;
+  width: 60px;
+  height: 80px;
+  color: var(--color-accent);
+  cursor: pointer;
+  animation: walk 14s linear forwards;
+}
+.idle-walker svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  animation: bob 500ms ease-in-out infinite alternate;
+}
+.idle-walker path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.idle-walker .w-legs {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+  animation: stride 500ms ease-in-out infinite alternate;
+}
+.idle-walker.is-caught {
+  animation: caught 900ms ease forwards;
+}
+.idle-walker.is-static {
+  left: auto;
+  right: 5rem;
+  animation: none;
+}
+.idle-walker.is-static svg,
+.idle-walker.is-static .w-legs {
+  animation: none;
+}
+@keyframes walk {
+  to {
+    left: 100vw;
+  }
+}
+@keyframes bob {
+  to {
+    transform: translateY(-3px) rotate(2deg);
+  }
+}
+@keyframes stride {
+  from {
+    transform: skewX(-12deg);
+  }
+  to {
+    transform: skewX(12deg);
+  }
+}
+@keyframes caught {
+  40% {
+    transform: translateY(-14px) rotate(-8deg);
+  }
+  100% {
+    transform: translateY(6px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .disc-pill.is-pop,
+  .disc-ripple,
+  .disc-roll.is-in,
+  .disc-roll.is-out,
+  .disc-panel,
+  .idle-walker,
+  .idle-walker svg,
+  .idle-walker .w-legs {
+    animation: none;
+  }
+  .signature path,
+  .bottom-note {
+    transition: none;
+  }
+}

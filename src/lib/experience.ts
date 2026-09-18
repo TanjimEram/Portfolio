@@ -58,14 +58,29 @@ export function onModeChange(fn: (mode: ExperienceMode) => void): () => void {
   return () => document.removeEventListener(EVENT, handler);
 }
 
-/** Small one-line status toast shared by modules. */
-export function toast(text: string, ms = 3200): void {
+/** Small one-line status toast shared by modules. Queued: only one is ever on screen. */
+const toastQueue: { text: string; ms: number }[] = [];
+let toastShowing = false;
+function nextToast() {
+  const item = toastQueue.shift();
+  if (!item) {
+    toastShowing = false;
+    return;
+  }
+  toastShowing = true;
   const el = document.createElement('div');
   el.setAttribute('role', 'status');
   el.className = 'toast';
-  el.textContent = text;
+  el.textContent = item.text;
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), ms);
+  setTimeout(() => {
+    el.remove();
+    setTimeout(nextToast, 250);
+  }, item.ms);
+}
+export function toast(text: string, ms = 3200): void {
+  toastQueue.push({ text, ms });
+  if (!toastShowing) nextToast();
 }
 
 /**

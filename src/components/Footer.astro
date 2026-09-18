@@ -2,11 +2,24 @@
 import { siteConfig } from '../site.config';
 
 const year = new Date().getFullYear();
+const eggs = siteConfig.features.easterEggs;
+// loose "TE" flourish — the `signature` discovery draws it on hover
+const signaturePath =
+  'M8 22 C22 16 44 14 60 15 M34 15 C33 30 31 46 32 62 C33 68 40 70 46 64 M58 38 C70 34 84 34 92 38 C82 46 68 52 60 46 C54 40 62 32 74 32 C90 32 100 44 96 56 C92 66 74 70 62 62';
 ---
 
 <footer class="relative z-10 border-t border-border">
   <div class="container-wide flex flex-col gap-3 py-10 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
-    <p>© {year} {siteConfig.name}</p>
+    <p class="flex items-center gap-3">
+      <span>© {year} {siteConfig.name}</span>
+      {
+        eggs && (
+          <svg class="signature" data-egg="signature" viewBox="0 0 104 76" tabindex="0" role="img" aria-label="Signature">
+            <path d={signaturePath} pathLength="1" />
+          </svg>
+        )
+      }
+    </p>
     <ul class="flex gap-5">
       <li><a href={siteConfig.links.github} class="inline-block py-1 transition-colors hover:text-accent-ink" rel="me noopener" target="_blank">GitHub</a></li>
       <li><a href={siteConfig.links.linkedin} class="inline-block py-1 transition-colors hover:text-accent-ink" rel="me noopener" target="_blank">LinkedIn</a></li>

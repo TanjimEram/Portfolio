@@ -1,19 +1,22 @@
 ---
 /**
- * DEV ONLY routes: /dev/patterns and /dev/doodles. No static paths in production, so nothing is emitted to dist/.
+ * DEV ONLY routes: /dev/patterns, /dev/doodles and /dev/discovery. No static paths in production, so nothing is emitted to dist/.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PatternGallery from '../../components/dev/PatternGallery.astro';
 import DoodleGallery from '../../components/dev/DoodleGallery.astro';
+import DiscoveryPanel from '../../components/dev/DiscoveryPanel.astro';
 
 export function getStaticPaths() {
-  return import.meta.env.DEV ? [{ params: { page: 'patterns' } }, { params: { page: 'doodles' } }] : [];
+  return import.meta.env.DEV
+    ? [{ params: { page: 'patterns' } }, { params: { page: 'doodles' } }, { params: { page: 'discovery' } }]
+    : [];
 }
 
 const { page } = Astro.params;
-const titles = { patterns: 'Patterns', doodles: 'Doodles' } as const;
+const titles = { patterns: 'Patterns', doodles: 'Doodles', discovery: 'Discoveries' } as const;
 ---
 
 <BaseLayout title={titles[page as keyof typeof titles]} description="Dev gallery" noindex>
-  {page === 'doodles' ? <DoodleGallery /> : <PatternGallery />}
+  {page === 'doodles' ? <DoodleGallery /> : page === 'discovery' ? <DiscoveryPanel /> : <PatternGallery />}
 </BaseLayout>

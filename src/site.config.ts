@@ -35,6 +35,8 @@ export interface SiteConfig {
     eyebrow: string;
     /** Filename inside src/assets (e.g. "portrait.jpg"); omit for the placeholder silhouette */
     portrait?: string;
+    /** Optional sketched version, swapped in by the long-hover discovery; without it a line-art filter is used */
+    portraitSketch?: string;
     portraitAlt: string;
     cta: { label: string; href: string };
   };
@@ -91,6 +93,16 @@ export interface SiteConfig {
    * `selector` (+ optional `text`) picks the target; doodles sit in the whitespace around it.
    */
   doodles?: DoodlePlacement[];
+
+  /** Discovery (easter-egg) copy and settings — `features.easterEggs` */
+  discovery?: {
+    /** Shown in the panel once everything is found */
+    completeNote: string;
+    /** Revealed by scrolling past the bottom of the page */
+    bottomMessage: string;
+    /** Accent presets cycled by triple-clicking the logo; index 0 is "back to normal" */
+    palette: string[];
+  };
 
   /** Feature flags for optional Full Experience modules. Keep false until the module exists. */
   features: {
@@ -186,9 +198,15 @@ export const siteConfig: SiteConfig = {
     { selector: '#contact a[href^="mailto:"]', type: 'bracket-right', position: 'right', size: 14, offset: { x: 2 } },
   ],
 
+  discovery: {
+    completeNote: "That's all seven — thank you for looking around so carefully. If you'd like to work together, write to me:",
+    bottomMessage: 'You scrolled past the end. There was nothing here, but now there is — hello.',
+    palette: ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#ec4899'],
+  },
+
   features: {
     doodles: true,
-    easterEggs: false,
+    easterEggs: true,
     caseFile: false,
     terminalView: false,
   },

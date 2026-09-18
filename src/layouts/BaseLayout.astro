@@ -8,6 +8,7 @@ import Footer from '../components/Footer.astro';
 import BackgroundFX from '../components/BackgroundFX.astro';
 import DevAccentSwitcher from '../components/DevAccentSwitcher.astro';
 import Doodles from '../components/Doodles.astro';
+import Discovery from '../components/Discovery.astro';
 import { accentSet } from '../lib/color';
 import { patternVars, type PatternName } from '../lib/patterns';
 
@@ -137,6 +138,7 @@ if (accent) {
     <Footer />
     <div class="cursor-dot" aria-hidden="true" transition:persist="cursor-dot"></div>
     {siteConfig.features.doodles && <Doodles />}
+    {siteConfig.features.easterEggs && <Discovery />}
     {import.meta.env.DEV && <DevAccentSwitcher />}
   </body>
 </html>

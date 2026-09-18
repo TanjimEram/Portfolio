@@ -1,0 +1,34 @@
+---
+/**
+ * Mounts the discovery module (Full Experience + `features.easterEggs`), hands it its config as JSON,
+ * and provides the SVG filters used by sketch mode and the sketched portrait.
+ */
+import { siteConfig } from '../site.config';
+
+const cfg = {
+  email: siteConfig.email,
+  completeNote: siteConfig.discovery?.completeNote ?? '',
+  bottomMessage: siteConfig.discovery?.bottomMessage ?? '',
+  palette: siteConfig.discovery?.palette ?? [],
+};
+---
+
+<script type="application/json" data-discovery-config set:html={JSON.stringify(cfg)} />
+
+{/* filters: `sketch-edge` roughens outlines (sketch mode), `sketch-ink` turns a photo into line work */}
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="sketch-edge" x="-2%" y="-2%" width="104%" height="104%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n" />
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.5" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+  <filter id="sketch-ink" color-interpolation-filters="sRGB">
+    <feColorMatrix type="saturate" values="0" />
+    <feConvolveMatrix order="3" kernelMatrix="-1 -1 -1 -1 8 -1 -1 -1 -1" preserveAlpha="true" result="edges" />
+    <feColorMatrix in="edges" type="matrix" values="-1 0 0 0 1  0 -1 0 0 1  0 0 -1 0 1  0 0 0 1 0" result="inv" />
+    <feComponentTransfer in="inv"><feFuncR type="gamma" exponent="2.2" /><feFuncG type="gamma" exponent="2.2" /><feFuncB type="gamma" exponent="2.2" /></feComponentTransfer>
+  </filter>
+</svg>
+
+<script>
+  import '../modules/discovery';
+</script>

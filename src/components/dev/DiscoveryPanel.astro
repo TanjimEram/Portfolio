@@ -1,0 +1,103 @@
+---
+/**
+ * DEV ONLY (/dev/discovery): trigger and reset each discoverable, watch the store's events.
+ * The module must be on (Full Experience) for triggers to do anything visible.
+ */
+const eggs = [
+  { id: 'signature', how: 'Hover / focus the faint signature next to © in the footer until it finishes drawing.' },
+  { id: 'konami', how: '↑ ↑ ↓ ↓ ← → ← → B A — toggles sketch mode; same code turns it off.' },
+  { id: 'console', how: 'Open devtools with the console visible (the note logs on enable).' },
+  { id: 'logo-triple', how: 'Click the TE monogram three times quickly — cycles the accent palette.' },
+  { id: 'long-hover', how: 'Rest the pointer on the hero portrait for 3 seconds.' },
+  { id: 'bottom', how: 'At the very bottom of the page, keep scrolling (wheel / swipe) a little more.' },
+  { id: 'idle', how: 'Do nothing for 30 s; click the wanderer before it leaves.' },
+];
+---
+
+<div class="container-wide py-12">
+  <p class="label-mono">Dev · discovery</p>
+  <h1 class="mt-3 text-4xl font-extrabold tracking-[-0.03em]">Discoveries</h1>
+  <p class="mt-4 max-w-[60ch] text-muted">
+    Requires Full Experience (toggle in the nav). <em>Trigger</em> runs the egg's effect and marks it found;
+    <em>Mark found</em> only touches the store. Events from the store are logged below.
+  </p>
+
+  <div class="mt-6 flex flex-wrap gap-3" data-disc-dev>
+    <button type="button" class="btn-outline" data-action="reset">Reset all</button>
+    <button type="button" class="btn-outline" data-action="find-all">Find all (test the finale)</button>
+    <button type="button" class="btn-outline" data-action="sketch">Toggle sketch mode</button>
+  </div>
+
+  <ul class="mt-8 grid gap-4 sm:grid-cols-2" data-disc-dev>
+    {
+      eggs.map((e) => (
+        <li class="card p-5">
+          <div class="flex items-center justify-between gap-3">
+            <b class="font-mono text-sm" data-egg-id={e.id}>{e.id}</b>
+            <span class="font-mono text-xs text-muted" data-status={e.id}>—</span>
+          </div>
+          <p class="mt-2 text-sm text-muted">{e.how}</p>
+          <div class="mt-4 flex gap-2">
+            <button type="button" class="btn-solid" data-action="trigger" data-id={e.id}>Trigger</button>
+            <button type="button" class="btn-outline" data-action="found" data-id={e.id}>Mark found</button>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  <section class="mt-10">
+    <p class="label-mono">Store events</p>
+    <pre class="card mt-3 max-h-64 overflow-auto p-4 font-mono text-xs text-muted" data-disc-log>—</pre>
+  </section>
+</div>
+
+<script>
+  import { found, list, reset } from '../../modules/discovery/store';
+  import { toggleSketch } from '../../modules/discovery/eggs/konami';
+
+  const log = (line: string) => {
+    const pre = document.querySelector<HTMLElement>('[data-disc-log]');
+    if (!pre) return;
+    pre.textContent = `${new Date().toLocaleTimeString()}  ${line}\n${pre.textContent === '—' ? '' : pre.textContent}`;
+  };
+  const paint = () => {
+    for (const d of list()) {
+      const el = document.querySelector<HTMLElement>(`[data-status="${d.id}"]`);
+      if (el) el.textContent = d.foundAt ? `found ${new Date(d.foundAt).toLocaleTimeString()}` : 'locked';
+    }
+  };
+
+  document.addEventListener('click', (e) => {
+    const b = (e.target as Element).closest<HTMLElement>('[data-disc-dev] [data-action]');
+    if (!b) return;
+    const id = b.dataset.id ?? '';
+    switch (b.dataset.action) {
+      case 'trigger':
+        document.dispatchEvent(new CustomEvent('discovery:trigger', { detail: id }));
+        break;
+      case 'found':
+        found(id);
+        break;
+      case 'reset':
+        reset();
+        break;
+      case 'find-all':
+        list().forEach((d) => found(d.id));
+        break;
+      case 'sketch':
+        toggleSketch();
+        break;
+    }
+    setTimeout(paint, 50);
+  });
+
+  for (const ev of ['discovery:found', 'discovery:complete', 'discovery:reset']) {
+    document.addEventListener(ev, (e) => {
+      log(`${ev} ${JSON.stringify((e as CustomEvent).detail ?? {})}`);
+      paint();
+    });
+  }
+  document.addEventListener('astro:page-load', paint);
+  paint();
+</script>
