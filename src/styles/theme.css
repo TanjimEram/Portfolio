@@ -30,6 +30,9 @@
 
   /* Background FX intensities (light mode has its own set below) */
   --fx-pattern: 0.16;
+  --fx-bands: 0.65; /* halftone shading bands (bold dots) */
+  --fx-specks: 0.5; /* sparse bright pinpoints */
+  --fx-floor: rgba(0, 0, 0, 0.4); /* how much of the pattern shows behind the content column */
   --fx-glow: 0.14;
   --fx-grain: 0.02;
   --fx-grain-blend: screen;
@@ -67,6 +70,9 @@
   --color-border: rgba(0, 0, 0, 0.1);
 
   --fx-pattern: 0.08;
+  --fx-bands: 0.3;
+  --fx-specks: 0.3;
+  --fx-floor: rgba(0, 0, 0, 0.35);
   --fx-glow: 0; /* no glows in light: depth comes from warm shadows instead */
   --fx-grain: 0.015;
   --fx-grain-blend: multiply;

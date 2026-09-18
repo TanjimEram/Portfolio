@@ -22,6 +22,8 @@ export interface PatternOptions {
   opacity?: number;
   /** Degrees; applied by the caller to the layer element. */
   rotation?: number;
+  /** Heavier variant on the same lattice (halftone: bigger dots) for the BackgroundFX shading bands. */
+  bold?: boolean;
 }
 
 export interface PatternResult {
@@ -45,6 +47,7 @@ const defaults = (o: PatternOptions = {}, rotation = 0): Required<PatternOptions
   scale: o.scale ?? 1,
   opacity: o.opacity ?? 1,
   rotation: o.rotation ?? rotation,
+  bold: o.bold ?? false,
 });
 
 const result = (w: number, h: number, body: string, o: Required<PatternOptions>): PatternResult => ({
@@ -54,10 +57,10 @@ const result = (w: number, h: number, body: string, o: Required<PatternOptions>)
   rotation: o.rotation,
 });
 
-/** Dot grid (r 1.2 on 8px); rotated 45° by default so it reads as diamonds. */
+/** Dot grid (r 1.2 on 8px, r 2.6 when bold), square-aligned like a print halftone. */
 export function halftone(opts?: PatternOptions): PatternResult {
-  const o = defaults(opts, 45);
-  return result(8, 8, `<circle cx='4' cy='4' r='1.2' stroke='none'/>`, o);
+  const o = defaults(opts, 0);
+  return result(8, 8, `<circle cx='4' cy='4' r='${o.bold ? 2.6 : 1.2}' stroke='none'/>`, o);
 }
 
 /** Carbon-fibre weave: alternating blocks of ±45° hatching. */
@@ -175,8 +178,9 @@ export const FINE_SCALE = 0.4;
 export function patternVars(name: PatternName, opts?: PatternOptions): string {
   const p = patterns[name](opts);
   const fine = `${Math.max(2, Math.round(p.width * FINE_SCALE))}px ${Math.max(2, Math.round(p.height * FINE_SCALE))}px`;
+  const bold = patterns[name]({ ...opts, bold: true });
   return (
-    `--pattern-image: ${p.uri}; --pattern-size: ${Math.round(p.width)}px ${Math.round(p.height)}px; ` +
-    `--pattern-size-fine: ${fine}; --pattern-rotate: ${p.rotation}deg;`
+    `--pattern-image: ${p.uri}; --pattern-image-bold: ${bold.uri}; --pattern-size: ${Math.round(p.width)}px ${Math.round(p.height)}px; ` +
+    `--pattern-size-fine: ${fine}; --pattern-rotate: ${p.rotation}deg; --pattern-fine: ${name === 'halftone' ? 0 : 1};`
   );
 }

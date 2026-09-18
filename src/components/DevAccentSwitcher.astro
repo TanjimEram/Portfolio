@@ -9,8 +9,9 @@ const presets = ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#0ea5e9
 // Pre-render every pattern's variables so the client can swap without shipping the generator
 const patternOptions = patternNames.map((name) => {
   const p = patterns[name]();
+  const bold = patterns[name]({ bold: true });
   const fine = `${Math.max(2, Math.round(p.width * FINE_SCALE))}px ${Math.max(2, Math.round(p.height * FINE_SCALE))}px`;
-  return { name, image: p.uri, size: `${p.width}px ${p.height}px`, fine, rotate: `${p.rotation}deg` };
+  return { name, image: p.uri, bold: bold.uri, size: `${p.width}px ${p.height}px`, fine, rotate: `${p.rotation}deg` };
 });
 ---
 
@@ -20,7 +21,7 @@ const patternOptions = patternNames.map((name) => {
   <input type="color" value="#e8412f" aria-label="Custom accent" />
   <select aria-label="Background pattern" data-pattern-select>
     <option value="">pattern…</option>
-    {patternOptions.map((p) => <option value={p.name} data-image={p.image} data-size={p.size} data-fine={p.fine} data-rotate={p.rotate}>{p.name}</option>)}
+    {patternOptions.map((p) => <option value={p.name} data-image={p.image} data-bold={p.bold} data-size={p.size} data-fine={p.fine} data-rotate={p.rotate}>{p.name}</option>)}
   </select>
   <a href="/dev/patterns" class="reset">patterns</a>
   <a href="/dev/doodles" class="reset">doodles</a>
@@ -125,9 +126,11 @@ const patternOptions = patternNames.map((name) => {
     if (!opt?.value) return;
     const root = document.documentElement;
     root.style.setProperty('--pattern-image', opt.dataset.image ?? '');
+    root.style.setProperty('--pattern-image-bold', opt.dataset.bold ?? opt.dataset.image ?? '');
     root.style.setProperty('--pattern-size', opt.dataset.size ?? '');
     root.style.setProperty('--pattern-size-fine', opt.dataset.fine ?? '');
     root.style.setProperty('--pattern-rotate', opt.dataset.rotate ?? '0deg');
+    root.style.setProperty('--pattern-fine', opt.value === 'halftone' ? '0' : '1');
     document.dispatchEvent(new CustomEvent('fx:pattern'));
   });
 </script>

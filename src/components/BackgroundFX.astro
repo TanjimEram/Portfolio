@@ -20,18 +20,50 @@ const grainTile =
   `<rect width='100%' height='100%' filter='url(#n)'/></svg>`;
 
 const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
+
+/*
+ * Shading bands: a few long diagonal bars, each fading out along its length, used as a mask over the
+ * bold pattern tile so the dots swell inside the bands and thin out at their ends — a print halftone.
+ * Drawn in a 1600² box that `mask-size: cover` scales to the layer; a light blur keeps the edges soft.
+ */
+const band = (x: number, y: number, w: number, h: number, id: string, flip = false) =>
+  `<rect x='${x}' y='${y}' width='${w}' height='${h}' fill='url(#${id})' transform='rotate(-45 ${x + w / 2} ${y + h / 2})'/>` +
+  `<linearGradient id='${id}' x1='${flip ? 1 : 0}' y1='0' x2='${flip ? 0 : 1}' y2='0'>` +
+  `<stop offset='0' stop-color='#fff'/><stop offset='0.55' stop-color='#fff' stop-opacity='0.55'/><stop offset='1' stop-color='#fff' stop-opacity='0'/></linearGradient>`;
+const bandsTile =
+  `<svg xmlns='http://www.w3.org/2000/svg' width='1600' height='1600' viewBox='0 0 1600 1600' preserveAspectRatio='xMidYMid slice'>` +
+  `<filter id='s'><feGaussianBlur stdDeviation='4'/></filter><g filter='url(#s)'>` +
+  band(940, 120, 640, 210, 'g1') +
+  band(1180, 480, 520, 170, 'g2', true) +
+  band(-60, 460, 600, 240, 'g3', true) +
+  band(300, 760, 420, 150, 'g4') +
+  band(60, 1060, 860, 280, 'g5') +
+  band(820, 1160, 640, 200, 'g6', true) +
+  band(1240, 900, 400, 140, 'g7') +
+  `</g></svg>`;
+const bands = `url("data:image/svg+xml,${encodeURIComponent(bandsTile)}")`;
+
+/* Sparse bright specks, like dust on the print. 160px tile, a handful of pinpoints. */
+const speckTile =
+  `<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><g fill='#000'>` +
+  `<circle cx='23' cy='41' r='1.3'/><circle cx='97' cy='18' r='1'/><circle cx='138' cy='73' r='1.4'/>` +
+  `<circle cx='61' cy='102' r='1'/><circle cx='118' cy='131' r='1.2'/><circle cx='12' cy='146' r='1'/><circle cx='84' cy='66' r='0.8'/>` +
+  `</g></svg>`;
+const specks = `url("data:image/svg+xml,${encodeURIComponent(speckTile)}")`;
 ---
 
 <div class="fx" aria-hidden="true" transition:persist="background-fx" data-fx>
   <div class="fx-mask">
     <div class="fx-pattern is-active" data-layer="a"><i></i><b></b></div>
     <div class="fx-pattern" data-layer="b"><i></i><b></b></div>
+    <div class="fx-bands"><i></i></div>
+    <div class="fx-specks"></div>
   </div>
   <div class="fx-glow"></div>
   <div class="fx-grain"></div>
 </div>
 
-<style define:vars={{ grain }}>
+<style define:vars={{ grain, bands, specks }}>
   .fx {
     position: fixed;
     inset: 0;
@@ -49,7 +81,7 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
    * Density mask = union of:
    *   - two tight corner radials (top-right, bottom-left) with a short falloff
    *   - the outer margins beside the content column (only exists on wide viewports)
-   * Everything else is fully transparent, so nothing sits under text.
+   *   - a floor everywhere else, so the dot grid runs under the content too (dimmed, never clear)
    */
   .fx-mask {
     --edge: calc(50% - (var(--content-width) / 2));
@@ -64,7 +96,8 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
         transparent calc(100% - var(--edge) + 0.5rem),
         #000 calc(100% - var(--edge) + 3rem),
         #000 100%
-      );
+      ),
+      linear-gradient(var(--fx-floor), var(--fx-floor));
     -webkit-mask-image:
       radial-gradient(48vmax 48vmax at 100% 0%, #000 0%, #000 22%, transparent 52%),
       radial-gradient(44vmax 44vmax at 0% 100%, #000 0%, #000 20%, transparent 50%),
@@ -76,7 +109,8 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
         transparent calc(100% - var(--edge) + 0.5rem),
         #000 calc(100% - var(--edge) + 3rem),
         #000 100%
-      );
+      ),
+      linear-gradient(var(--fx-floor), var(--fx-floor));
     mask-composite: add;
     -webkit-mask-composite: source-over;
   }
@@ -108,7 +142,50 @@ const grain = `url("data:image/svg+xml,${encodeURIComponent(grainTile)}")`;
   .fx-pattern > b {
     mask-size: var(--layer-size-fine, var(--pattern-size-fine));
     -webkit-mask-size: var(--layer-size-fine, var(--pattern-size-fine));
-    opacity: 0.5;
+    opacity: calc(0.5 * var(--pattern-fine, 1)); /* halftone turns the fine copy off: one clean grid */
+  }
+
+  /* Shading bands: bold tile, aligned with the base grid (same box, same rotation), shaped by the band mask */
+  .fx-bands {
+    position: absolute;
+    inset: 0;
+    opacity: var(--fx-bands);
+    mask-image: var(--bands);
+    -webkit-mask-image: var(--bands);
+    mask-size: cover;
+    -webkit-mask-size: cover;
+    mask-position: center;
+    -webkit-mask-position: center;
+  }
+  .fx-bands > i {
+    position: absolute;
+    inset: -30%;
+    transform: rotate(var(--pattern-rotate, 0deg));
+    background-color: var(--color-accent);
+    mask-image: var(--pattern-image-bold, var(--pattern-image));
+    -webkit-mask-image: var(--pattern-image-bold, var(--pattern-image));
+    mask-size: var(--pattern-size);
+    -webkit-mask-size: var(--pattern-size);
+    transition: background-color 600ms ease;
+  }
+  .fx-specks {
+    background-color: var(--color-accent);
+    opacity: var(--fx-specks);
+    mask-image: var(--specks);
+    -webkit-mask-image: var(--specks);
+    mask-size: 160px 160px;
+    -webkit-mask-size: 160px 160px;
+    transition: background-color 600ms ease;
+  }
+
+  /* phones: the content column is the whole width, so keep the shading out from under the text */
+  @media (width < 48rem) {
+    .fx-bands {
+      opacity: calc(var(--fx-bands) * 0.55);
+    }
+    .fx-mask {
+      --fx-floor: rgba(0, 0, 0, 0.3);
+    }
   }
 
   .fx-glow {

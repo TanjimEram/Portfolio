@@ -167,7 +167,7 @@ const iconClass = 'size-5';
     background: var(--color-accent);
     mix-blend-mode: multiply;
     /* a light wash, not a full duotone: the photo stays mostly grayscale with a reddish cast */
-    opacity: var(--portrait-tint, 0.35);
+    opacity: var(--portrait-tint, 0.25);
     transition: background-color 600ms ease;
     /* the same cut-out as a mask, so only the person is tinted */
     mask-image: var(--portrait-mask);
@@ -184,7 +184,7 @@ const iconClass = 'size-5';
     filter: url(#sketch-ink);
   }
   .portrait.is-sketch .duotone {
-    opacity: 0.6;
+    opacity: 0.5;
   }
   /* light theme keeps multiply too: `screen` would turn the dark suit accent-coloured and lose it against the disc */
 
