@@ -90,7 +90,7 @@ const iconClass = 'size-5';
               </svg>
             )
           }
-          {/* duotone: accent multiplied over the grayscale photo, masked to the cut-out so the disc stays clean */}
+          {/* tint: a light accent wash multiplied over the grayscale photo, masked to the cut-out so the disc stays clean */}
           <div class="duotone" aria-hidden="true" style={hasWebp ? `--portrait-mask: url(${webp})` : portrait ? `--portrait-mask: url(${portrait})` : undefined}></div>
         </div>
       </div>
@@ -165,7 +165,9 @@ const iconClass = 'size-5';
     position: absolute;
     inset: 0;
     background: var(--color-accent);
-    mix-blend-mode: multiply; /* dark theme: black → accent */
+    mix-blend-mode: multiply;
+    /* a light wash, not a full duotone: the photo stays mostly grayscale with a reddish cast */
+    opacity: var(--portrait-tint, 0.35);
     transition: background-color 600ms ease;
     /* the same cut-out as a mask, so only the person is tinted */
     mask-image: var(--portrait-mask);
@@ -182,7 +184,7 @@ const iconClass = 'size-5';
     filter: url(#sketch-ink);
   }
   .portrait.is-sketch .duotone {
-    opacity: 0.85;
+    opacity: 0.6;
   }
   /* light theme keeps multiply too: `screen` would turn the dark suit accent-coloured and lose it against the disc */
 
