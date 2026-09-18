@@ -925,3 +925,216 @@ html[data-sketch] h3 {
     transition: none;
   }
 }
+
+/* ---------- terminal view (Full Experience module, src/modules/terminal) ---------- */
+
+/* the [ grid | terminal ] switch: full mode only */
+.term-switch {
+  display: none;
+  gap: 0.35rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+}
+html[data-experience='full'] .term-switch {
+  display: inline-flex;
+}
+.term-switch button {
+  padding: 0.15rem 0.35rem;
+  border-radius: 0.25rem;
+  color: var(--color-muted);
+  transition: color 200ms ease;
+}
+.term-switch button:hover {
+  color: var(--color-text);
+}
+.term-switch button[aria-pressed='true'] {
+  color: var(--color-accent-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.term-host {
+  display: contents;
+}
+
+/* morph: cards fade + shrink, window scales in */
+[data-projects-grid] {
+  transition:
+    opacity 400ms ease,
+    transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+section[data-view='terminal'] > [data-projects-grid] {
+  opacity: 0;
+  transform: scale(0.98);
+  pointer-events: none;
+  position: absolute;
+  inset: auto 0 auto 0;
+  visibility: hidden;
+}
+section[data-view] {
+  position: relative;
+}
+
+.term {
+  --term-bg: color-mix(in srgb, var(--color-surface) 30%, #0b0b0c);
+  --term-fg: #e8e8ea;
+  --term-dim: #8e8e95;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border);
+  background: var(--term-bg);
+  box-shadow: var(--shadow-card);
+  color: var(--term-fg);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 400ms ease,
+    transform 400ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 600ms ease;
+}
+.term.is-open {
+  opacity: 1;
+  transform: none;
+}
+/* CRT: faint scanlines + vignette, never in the way */
+.term::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px),
+    radial-gradient(120% 90% at 50% 50%, transparent 60%, rgba(0, 0, 0, 0.35) 100%);
+  mix-blend-mode: overlay;
+  opacity: 0.6;
+}
+.term-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid color-mix(in srgb, #fff 8%, transparent);
+  color: var(--term-dim);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+}
+.term-dots {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.term-dots i {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, #fff 18%, transparent);
+}
+.term-dots i:first-child {
+  background: var(--color-accent);
+}
+.term-screen {
+  height: 24rem;
+  max-height: 60vh;
+  overflow: auto;
+  padding: 0.9rem 1rem 1rem;
+  overscroll-behavior: contain;
+}
+.term-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 1.6em;
+}
+.term-echo {
+  color: var(--color-accent);
+}
+.term-dim {
+  color: var(--term-dim);
+}
+.term-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.term-prompt {
+  color: var(--color-accent);
+  white-space: nowrap;
+}
+.term-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: inherit;
+  font: inherit;
+  caret-color: transparent;
+}
+.term-input:focus {
+  outline: none;
+}
+/* block caret that blinks; sits right after the typed text via a shadow measurement trick */
+.term-caret {
+  display: none;
+}
+.term-row:focus-within .term-input {
+  caret-color: var(--color-accent);
+}
+.term-input:not(:focus) + .term-caret {
+  display: inline-block;
+  width: 0.6em;
+  height: 1.1em;
+  margin-left: -0.5rem;
+  background: var(--color-accent);
+  animation: term-blink 1s steps(2, start) infinite;
+}
+@keyframes term-blink {
+  to {
+    visibility: hidden;
+  }
+}
+/* tap-to-run chips on small screens */
+.term-chips {
+  display: none;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+}
+.term-chips button {
+  padding: 0.35rem 0.6rem;
+  border-radius: 9999px;
+  border: 1px solid color-mix(in srgb, #fff 15%, transparent);
+  color: var(--term-fg);
+  font: inherit;
+  font-size: 0.72rem;
+}
+.term-chips button:active {
+  background: var(--color-accent);
+  color: var(--color-accent-contrast);
+}
+@media (width < 48rem) {
+  .term-row {
+    display: none;
+  }
+  .term-chips {
+    display: flex;
+  }
+  .term-screen {
+    height: auto;
+    max-height: 70vh;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .term,
+  [data-projects-grid] {
+    transition: none;
+  }
+  .term-caret {
+    animation: none;
+  }
+}

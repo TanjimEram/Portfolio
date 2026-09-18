@@ -66,6 +66,17 @@ document.addEventListener('sound:chime', () => {
   [0, 2, 4, 7].forEach((step, i) => setTimeout(() => synth.pluck(noteFor(5 + step), { gain: 0.6, decay: 0.6 }), i * 160));
 });
 
+// Terminal: very quiet keystroke tick (max one per 30 ms) and a blip when a command runs
+let lastKey = 0;
+document.addEventListener('sound:key', () => {
+  if (!enabled) return;
+  const now = performance.now();
+  if (now - lastKey < 30) return;
+  lastKey = now;
+  synth.pluck(noteFor(12), { gain: 0.08, decay: 0.04 });
+});
+document.addEventListener('sound:blip', () => enabled && synth.pluck(noteFor(7), { gain: 0.35, decay: 0.12 }));
+
 // Click: arpeggio on project cards (then navigate), tick on nav links and buttons.
 // Capture phase so this runs before ClientRouter's own click handler, which would navigate at once.
 document.addEventListener(

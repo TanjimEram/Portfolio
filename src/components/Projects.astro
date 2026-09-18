@@ -2,6 +2,8 @@
 import { getHomeProjects } from '../lib/projects';
 import ProjectCard from './ProjectCard.astro';
 import Section from './Section.astro';
+import TerminalHost from './TerminalHost.astro';
+import { siteConfig } from '../site.config';
 
 import type { PatternName } from '../lib/patterns';
 
@@ -26,7 +28,8 @@ const total = String(shown.length).padStart(2, '0');
     <span>{total}</span>
   </div>
 
-  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group>
+  {siteConfig.features.terminalView && <TerminalHost />}
+  <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group data-projects-grid>
     {shown.map((project, i) => <ProjectCard project={project} index={i + 1} />)}
   </div>
 </Section>

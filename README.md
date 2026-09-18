@@ -128,6 +128,12 @@ Uses `gh` if installed, otherwise the public REST API (set `GITHUB_TOKEN` for a 
   (`store.ts`: `define / found / list / reset`, persisted, events `discovery:found|complete|reset`), a "n / 7 found"
   counter with a panel, and the eggs themselves in `eggs/`. Copy lives in `siteConfig.discovery`. Trigger and reset
   each one at `/dev/discovery` in dev.
+- **Terminal** (`src/modules/terminal/`, flag `features.terminalView`): a `[ grid | terminal ]` switch on the
+  Projects section (Full Experience) that morphs the grid into a bash-style window. Commands (`help`, `ls`,
+  `cat`, `open`, `live`, `repo`, `whoami`, `skills`, `exp`, `resume`, `contact`, `theme`, `sound`, `clear`, `exit`)
+  read a JSON blob that `TerminalHost.astro` builds from the content collections at build time — nothing is
+  copied by hand. Tab completion, history, Ctrl+L/Ctrl+C, tap-to-run chips under 768 px. Deep link:
+  `/projects?view=terminal`. Try it in isolation at `/dev/terminal`.
 - **Sound** (`src/lib/audio.ts`, `src/scripts/sound.ts`): a ~2 KB Web Audio synth, D-major pentatonic — a Full
   Experience module. Hovering a project card plays its note, clicking a card plays a short arpeggio, any other click
   ticks. The speaker toggle mutes; the module is only downloaded when it's needed.

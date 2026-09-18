@@ -1,0 +1,23 @@
+---
+/**
+ * /projects — every project (not just featured), same section component as the home page.
+ * /projects?view=terminal deep-links into the terminal view.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Section from '../../components/Section.astro';
+import TerminalHost from '../../components/TerminalHost.astro';
+import { getOrderedProjects } from '../../lib/projects';
+import { siteConfig } from '../../site.config';
+
+const projects = await getOrderedProjects();
+---
+
+<BaseLayout title="Projects" description={`All projects by ${siteConfig.name}.`}>
+  <Section id="projects" title="All projects" label="Work" wide>
+    {siteConfig.features.terminalView && <TerminalHost />}
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-reveal-group data-projects-grid>
+      {projects.map((project, i) => <ProjectCard project={project} index={i + 1} />)}
+    </div>
+  </Section>
+</BaseLayout>

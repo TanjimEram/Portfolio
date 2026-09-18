@@ -199,7 +199,7 @@ export const siteConfig: SiteConfig = {
   ],
 
   discovery: {
-    completeNote: "That's all seven — thank you for looking around so carefully. If you'd like to work together, write to me:",
+    completeNote: "That's everything — thank you for looking around so carefully. If you'd like to work together, write to me:",
     bottomMessage: 'You scrolled past the end. There was nothing here, but now there is — hello.',
     palette: ['#e8412f', '#2563eb', '#f59e0b', '#22c55e', '#7c3aed', '#ec4899'],
   },
@@ -207,8 +207,8 @@ export const siteConfig: SiteConfig = {
   features: {
     doodles: true,
     easterEggs: true,
+    terminalView: true,
     caseFile: false,
-    terminalView: false,
   },
 };
 

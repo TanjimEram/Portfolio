@@ -52,7 +52,7 @@ public/
 ```
 - **Nothing personal is hardcoded in components.** All text/links come from `site.config.ts` or content collections.
 - Sections render in the order listed in `site.config.ts` and can be turned off with flags.
-- Feature flags for optional modules: `doodles` (`src/modules/doodles/`), `easterEggs` (`src/modules/discovery/` — the discovery store the Case File phase builds on), and reserved (keep `false`): `caseFile`, `terminalView`. Playful modules plug into `src/lib/experience.ts` (`registerModule({ id, enable, disable })`) and only run in "Full Experience" mode, which visitors toggle in the nav; sound is the first such module.
+- Feature flags for optional modules: `doodles` (`src/modules/doodles/`), `easterEggs` (`src/modules/discovery/` — the discovery store the Case File phase builds on), `terminalView` (`src/modules/terminal/`, a bash-style view of the projects at `/projects?view=terminal`), and reserved (keep `false`): `caseFile`. Playful modules plug into `src/lib/experience.ts` (`registerModule({ id, enable, disable })`) and only run in "Full Experience" mode, which visitors toggle in the nav; sound is the first such module.
 
 ## Content schemas
 **projects**: `title, summary, description, tech[], repo?, live?, image?, color?, featured (bool), order, source ("github" | "manual")`

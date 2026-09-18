@@ -4,7 +4,7 @@ import { getCollection } from 'astro:content';
 /** Hand-rolled sitemap: home + every project page. Add new static routes here. */
 export const GET: APIRoute = async ({ site }) => {
   const projects = await getCollection('projects');
-  const urls = ['/', ...projects.map((p) => `/projects/${p.id}/`)].map((path) => new URL(path, site).href);
+  const urls = ['/', '/projects/', ...projects.map((p) => `/projects/${p.id}/`)].map((path) => new URL(path, site).href);
 
   const body =
     `<?xml version="1.0" encoding="UTF-8"?>\n` +

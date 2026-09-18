@@ -1,22 +1,39 @@
 ---
 /**
- * DEV ONLY routes: /dev/patterns, /dev/doodles and /dev/discovery. No static paths in production, so nothing is emitted to dist/.
+ * DEV ONLY routes: /dev/patterns, /dev/doodles, /dev/discovery and /dev/terminal. No static paths in production, so nothing is emitted to dist/.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PatternGallery from '../../components/dev/PatternGallery.astro';
 import DoodleGallery from '../../components/dev/DoodleGallery.astro';
 import DiscoveryPanel from '../../components/dev/DiscoveryPanel.astro';
+import TerminalHost from '../../components/TerminalHost.astro';
 
 export function getStaticPaths() {
   return import.meta.env.DEV
-    ? [{ params: { page: 'patterns' } }, { params: { page: 'doodles' } }, { params: { page: 'discovery' } }]
+    ? [{ params: { page: 'patterns' } }, { params: { page: 'doodles' } }, { params: { page: 'discovery' } }, { params: { page: 'terminal' } }]
     : [];
 }
 
 const { page } = Astro.params;
-const titles = { patterns: 'Patterns', doodles: 'Doodles', discovery: 'Discoveries' } as const;
+const titles = { patterns: 'Patterns', doodles: 'Doodles', discovery: 'Discoveries', terminal: 'Terminal' } as const;
 ---
 
 <BaseLayout title={titles[page as keyof typeof titles]} description="Dev gallery" noindex>
-  {page === 'doodles' ? <DoodleGallery /> : page === 'discovery' ? <DiscoveryPanel /> : <PatternGallery />}
+  {
+    page === 'doodles' ? (
+      <DoodleGallery />
+    ) : page === 'discovery' ? (
+      <DiscoveryPanel />
+    ) : page === 'terminal' ? (
+      <section class="container-wide py-12" data-view="terminal">
+        <p class="label-mono">Dev · terminal</p>
+        <h1 class="mt-3 text-4xl font-extrabold tracking-[-0.03em]">Terminal</h1>
+        <p class="mt-4 max-w-[60ch] text-muted">Isolated terminal (Full Experience is switched on for this page). Type <code>help</code>.</p>
+        <div class="mt-8" data-projects-grid hidden />
+        <TerminalHost autoOpen />
+      </section>
+    ) : (
+      <PatternGallery />
+    )
+  }
 </BaseLayout>

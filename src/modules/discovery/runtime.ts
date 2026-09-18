@@ -15,8 +15,9 @@ import { logoTriple } from './eggs/logoTriple';
 import { longHover } from './eggs/longHover';
 import { bottom } from './eggs/bottom';
 import { idle } from './eggs/idle';
+import { whois } from './eggs/whois';
 
-const eggs: Egg[] = [signature, konami, consoleEgg, logoTriple, longHover, bottom, idle];
+const eggs: Egg[] = [signature, konami, consoleEgg, logoTriple, longHover, bottom, idle, whois];
 define(eggs);
 
 const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;

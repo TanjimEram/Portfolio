@@ -1,0 +1,77 @@
+---
+/**
+ * Terminal view of the projects (Full Experience module, `features.terminalView`).
+ * Server side: gathers everything the terminal can print from the content collections and
+ * site.config into one JSON blob (derived at build — nothing is hand-copied), and renders the
+ * [ grid | terminal ] toggle plus the window skeleton. src/modules/terminal adds the behaviour.
+ */
+import { getCollection } from 'astro:content';
+import { siteConfig } from '../site.config';
+import { getOrderedProjects } from '../lib/projects';
+
+interface Props {
+  /** Open the terminal immediately (dev page) */
+  autoOpen?: boolean;
+}
+const { autoOpen = false } = Astro.props;
+
+const projects = (await getOrderedProjects()).map((p) => ({
+  id: p.id,
+  title: p.data.title,
+  summary: p.data.summary,
+  tech: p.data.tech,
+  repo: p.data.repo ?? null,
+  live: p.data.live ?? null,
+  featured: p.data.featured,
+}));
+const experience = (await getCollection('experience'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map((e) => ({ org: e.data.org, role: e.data.role, type: e.data.type, start: e.data.start, end: e.data.end ?? null, highlights: e.data.highlights }));
+
+const data = {
+  user: siteConfig.name.split(' ')[0]!.toLowerCase(),
+  name: siteConfig.name,
+  role: siteConfig.role,
+  location: siteConfig.location,
+  email: siteConfig.email,
+  links: siteConfig.links,
+  resume: siteConfig.resume,
+  resumeFilename: siteConfig.resumeFilename,
+  skills: siteConfig.skills,
+  projects,
+  experience,
+};
+---
+
+<div class="term-host" data-terminal-host data-auto-open={autoOpen ? '' : undefined}>
+  <script type="application/json" data-terminal-data set:html={JSON.stringify(data)} />
+
+  <div class="term-switch" role="group" aria-label="Projects view">
+    <span aria-hidden="true">[</span>
+    <button type="button" data-view-btn="grid" aria-pressed="true">grid</button>
+    <span aria-hidden="true">|</span>
+    <button type="button" data-view-btn="terminal" aria-pressed="false">terminal</button>
+    <span aria-hidden="true">]</span>
+  </div>
+
+  <div class="term" data-terminal hidden>
+    <div class="term-bar">
+      <span class="term-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span class="term-title">{data.user}@portfolio — bash</span>
+    </div>
+    <p class="sr-only">Interactive terminal. The grid view above contains the same projects; type <kbd>help</kbd> for commands.</p>
+    <div class="term-screen" data-screen>
+      <div class="term-out" data-out role="log" aria-live="polite" aria-relevant="additions"></div>
+      <form class="term-row" data-form autocomplete="off">
+        <label class="term-prompt" for="term-input" data-prompt>visitor@{data.user}:~$</label>
+        <input id="term-input" class="term-input" data-input type="text" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Terminal command" />
+        <span class="term-caret" aria-hidden="true"></span>
+      </form>
+      <div class="term-chips" data-chips aria-label="Commands"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import '../modules/terminal';
+</script>
