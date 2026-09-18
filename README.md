@@ -13,7 +13,7 @@ sentence.
 ## Quick start
 
 ```bash
-git clone https://github.com/TanjimEram/portfolio.git
+git clone https://github.com/TanjimEram/Portfolio.git
 cd portfolio
 npm install
 npm run dev        # http://localhost:4321
