@@ -43,3 +43,6 @@ desktop.ini
 
 # original photos for scripts/process-images.py (personal; the processed outputs in public/images are committed)
 src/assets/source/
+
+# /brag working files (rendered videos live in public/project_vids)
+brag-output*/

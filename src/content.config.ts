@@ -14,6 +14,8 @@ const projects = defineCollection({
       repo: z.string().url().optional(),
       live: z.string().url().optional(),
       image: image().optional(),
+      /** Intro video as a path under /public (e.g. /project_vids/Athena.mp4). A .jpg sibling is used as the poster when it exists. */
+      video: z.string().regex(/^\/.+\.mp4$/, 'video must be a /public path ending in .mp4').optional(),
       /** Hex colour (#rgb or #rrggbb); overrides the accent on the detail page ("chameleon") */
       color: z
         .string()

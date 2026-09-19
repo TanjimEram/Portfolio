@@ -4,6 +4,7 @@ summary: A desktop voice assistant I built to run my own machine.
 description: A Python voice assistant for Windows 11 with local wake-word detection, Groq Whisper speech-to-text, an LLM brain with tool calling, a safety gate for risky actions and Edge TTS for the voice.
 tech: [Python, Groq, openWakeWord, Edge TTS, pywebview, Supabase, Tavily]
 repo: https://github.com/TanjimEram/Athena-VA
+video: /project_vids/Athena.mp4
 color: '#4C8DFF'
 pattern: rings
 status: ongoing

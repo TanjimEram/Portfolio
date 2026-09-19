@@ -4,6 +4,7 @@ summary: A business selling printable detective case files people solve for them
 description: Goyenda sells printable detective case files — evidence, suspects and a solution emailed separately — made to be solved alone or with friends. Site, case format and business, all built by me.
 tech: [Next.js, TypeScript, React, Tailwind CSS, Supabase, PostgreSQL, Resend, Cloudflare Workers]
 repo: https://github.com/TanjimEram/Goyendaa
+video: /project_vids/Goyenda.mp4
 color: '#C9A227'
 pattern: scatter
 status: in-development

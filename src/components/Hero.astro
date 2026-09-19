@@ -156,7 +156,8 @@ const iconClass = 'size-5';
   .portrait-clip :global(img.portrait-img) {
     object-fit: contain;
     object-position: 50% 100%;
-    filter: grayscale(1) contrast(1.05);
+    /* natural colour, just a touch desaturated so the disc stays the loudest red */
+    filter: grayscale(0.2) contrast(1.03);
   }
   .portrait-clip svg.portrait-img {
     filter: grayscale(1);
@@ -166,8 +167,8 @@ const iconClass = 'size-5';
     inset: 0;
     background: var(--color-accent);
     mix-blend-mode: multiply;
-    /* a light wash, not a full duotone: the photo stays mostly grayscale with a reddish cast */
-    opacity: var(--portrait-tint, 0.25);
+    /* a faint wash only: the photo keeps its own colours */
+    opacity: var(--portrait-tint, 0.1);
     transition: background-color 600ms ease;
     /* the same cut-out as a mask, so only the person is tinted */
     mask-image: var(--portrait-mask);

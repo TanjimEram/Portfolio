@@ -1,4 +1,6 @@
 ---
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -29,11 +31,14 @@ interface Props {
 
 const { project, index, total, prev, next } = Astro.props;
 const { Content } = await render(project);
-const { title, summary, description, tech, repo, live, image, color, pattern, status, statusNote } = project.data;
+const { title, summary, description, tech, repo, live, image, video, color, pattern, status, statusNote } = project.data;
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const repoName = repo ? repo.replace(/^https?:\/\/(www\.)?github\.com\//, '') : undefined;
 const liveHost = live ? new URL(live).host : undefined;
+// Poster: a .jpg next to the video under /public, if one exists
+const poster = video?.replace(/\.mp4$/, '.jpg');
+const hasPoster = !!poster && existsSync(resolve(process.cwd(), 'public', poster.replace(/^\//, '')));
 ---
 
 <BaseLayout title={title} description={description} accent={color} pattern={pattern}>
@@ -135,6 +140,23 @@ const liveHost = live ? new URL(live).host : undefined;
         }
       </dl>
     </header>
+
+    {/* ---- intro video ---- */}
+    {
+      video && (
+        <figure class="card mt-12 overflow-hidden sm:mt-16" data-reveal>
+          <video
+            src={video}
+            poster={hasPoster ? poster : undefined}
+            controls
+            playsinline
+            preload="metadata"
+            class="aspect-video w-full bg-black"
+            aria-label={`Intro video for ${title}`}
+          ></video>
+        </figure>
+      )
+    }
 
     {/* ---- screenshot ---- */}
     {
