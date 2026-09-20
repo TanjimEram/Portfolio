@@ -8,6 +8,12 @@ color: '#E8412F'
 pattern: chevron
 status: shipped
 statusNote: Hosting has since expired
+run:
+  - "# plain HTML/CSS/JS — nothing to install"
+  - "git clone https://github.com/TanjimEram/MarXcellence2025.git"
+  - "cd MarXcellence2025"
+  - "# any static server works"
+  - "npx serve ."
 featured: false
 order: 6
 source: manual

@@ -9,6 +9,15 @@ color: '#C9A227'
 pattern: scatter
 status: in-development
 statusNote: Launching soon
+run:
+  - "# Node 20+, a Supabase project (free tier is fine)"
+  - "git clone https://github.com/TanjimEram/Goyendaa.git"
+  - "cd Goyendaa"
+  - "npm install"
+  - "# Supabase keys go in .env.local; run supabase/migrations/0001_cases.sql in the SQL editor"
+  - "cp .env.example .env.local"
+  - "npm run dev"
+  - "# http://localhost:3000 — the admin is at /admin"
 featured: true
 order: 2
 source: manual

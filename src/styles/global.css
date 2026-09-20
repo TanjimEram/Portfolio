@@ -1065,6 +1065,55 @@ section[data-view] {
 .term-dim {
   color: var(--term-dim);
 }
+.term-cmd {
+  /* a runnable command: click copies it */
+  cursor: copy;
+  border-radius: 0.25rem;
+  margin-left: -0.35rem;
+  padding-left: 0.35rem;
+  transition: background-color 150ms ease;
+}
+.term-cmd:hover,
+.term-cmd:focus-visible {
+  background: var(--color-accent-soft);
+  outline: none;
+}
+.term-cmd::after {
+  content: 'copy';
+  margin-left: 0.75rem;
+  font-size: 0.8em;
+  color: var(--term-dim);
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+.term-cmd:hover::after,
+.term-cmd:focus-visible::after,
+.term-cmd.is-copied::after {
+  opacity: 1;
+}
+.term-cmd.is-copied::after {
+  content: 'copied';
+  color: var(--color-accent-ink);
+}
+@media (pointer: coarse) {
+  .term-cmd {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .term-cmd::after {
+    opacity: 1; /* no hover on touch: always show the affordance */
+  }
+}
+.term-video {
+  display: block;
+  width: 100%;
+  max-width: 48rem;
+  margin: 0.5rem 0 0.75rem;
+  border-radius: 0.5rem;
+  background: #000;
+  aspect-ratio: 16 / 9;
+}
 .term-row {
   display: flex;
   align-items: center;

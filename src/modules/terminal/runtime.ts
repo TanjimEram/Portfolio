@@ -74,6 +74,14 @@ function setup(host: HTMLElement): () => void {
     busy = true;
     const line = document.createElement('div');
     line.className = 'term-line' + (job.cls ? ` ${job.cls}` : '');
+    // run-script conventions: `$ cmd` is a copyable command, `# …` a direction
+    if (!job.cls && job.text.startsWith('$ ')) {
+      line.className += ' term-cmd';
+      line.dataset.copy = job.text.slice(2);
+      line.setAttribute('role', 'button');
+      line.tabIndex = 0;
+      line.title = 'copy';
+    } else if (!job.cls && job.text.startsWith('#')) line.className += ' term-dim';
     out.appendChild(line);
     if (!job.typed || reduced() || skip) {
       line.textContent = job.text;
@@ -138,6 +146,19 @@ function setup(host: HTMLElement): () => void {
       case 'clear':
         clear();
         break;
+      case 'video': {
+        const v = document.createElement('video');
+        v.src = e.src;
+        v.controls = true;
+        v.playsInline = true;
+        v.className = 'term-video';
+        v.setAttribute('aria-label', `${e.title} intro video`);
+        out.appendChild(v);
+        scroll();
+        v.play().catch(() => {}); // the Enter key was the gesture; if a browser still refuses, the controls are there
+        v.addEventListener('ended', () => print(['# that was the intro. type help for more.'], undefined, false));
+        break;
+      }
       case 'exit':
         setTimeout(() => setView('grid'), 400);
         break;
@@ -204,8 +225,40 @@ function setup(host: HTMLElement): () => void {
     }
     if (e.key.length === 1) sound('sound:key');
   };
+  const copyCmd = (el: HTMLElement) => {
+    const text = el.dataset.copy ?? '';
+    const done = () => {
+      el.classList.add('is-copied');
+      sound('sound:blip');
+      setTimeout(() => el.classList.remove('is-copied'), 1200);
+    };
+    // execCommand fallback: plain-http previews and older WebViews have no async clipboard
+    const legacy = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      ta.remove();
+      if (ok) done();
+    };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(done, legacy);
+    else legacy();
+  };
   const onClick = (e: MouseEvent) => {
-    if (!(e.target as Element).closest('a, button')) input.focus({ preventScroll: true });
+    const cmd = (e.target as Element).closest<HTMLElement>('.term-cmd');
+    if (cmd) return copyCmd(cmd);
+    if (!(e.target as Element).closest('a, button, video')) input.focus({ preventScroll: true });
+  };
+  const onCmdKey = (e: KeyboardEvent) => {
+    const cmd = (e.target as Element).closest<HTMLElement>('.term-cmd');
+    if (cmd && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      copyCmd(cmd);
+    }
   };
   // soft keyboard: keep the prompt visible
   const onFocus = () => setTimeout(() => input.scrollIntoView({ block: 'center', behavior: reduced() ? 'auto' : 'smooth' }), 300);
@@ -213,7 +266,15 @@ function setup(host: HTMLElement): () => void {
   /* ---------- chips (small screens) ---------- */
   const buildChips = () => {
     if (!chips) return;
-    const list = ['help', 'ls', 'whoami', 'skills', 'exp', 'contact', ...projectIds.slice(0, 3).map((id) => `cat ${id}`), 'exit'];
+    const demo = data.projects.find((p) => p.video);
+    const runnable = data.projects.find((p) => p.run.length);
+    const list = [
+      'help', 'ls', 'whoami', 'skills', 'exp', 'contact',
+      ...projectIds.slice(0, 2).map((id) => `cat ${id}`),
+      ...(runnable ? [`run ${runnable.id}`] : []),
+      ...(demo ? [`demo ${demo.id}`] : []),
+      'exit',
+    ];
     chips.innerHTML = list.map((c) => `<button type="button" data-chip="${c}">${c}</button>`).join('');
   };
   const onChip = (e: Event) => {
@@ -264,6 +325,7 @@ function setup(host: HTMLElement): () => void {
   input.addEventListener('keydown', onKey);
   input.addEventListener('focus', onFocus);
   term.addEventListener('click', onClick);
+  term.addEventListener('keydown', onCmdKey);
   chips?.addEventListener('click', onChip);
 
   const wantsTerminal =
@@ -277,6 +339,7 @@ function setup(host: HTMLElement): () => void {
     input.removeEventListener('keydown', onKey);
     input.removeEventListener('focus', onFocus);
     term.removeEventListener('click', onClick);
+    term.removeEventListener('keydown', onCmdKey);
     chips?.removeEventListener('click', onChip);
     if (view === 'terminal') setView('grid', false);
   };

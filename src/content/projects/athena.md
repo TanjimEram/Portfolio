@@ -9,6 +9,20 @@ color: '#4C8DFF'
 pattern: rings
 status: ongoing
 statusNote: Hobby project
+run:
+  - "# Windows 11, Python 3.12 and a free Groq key (console.groq.com)"
+  - "git clone https://github.com/TanjimEram/Athena-VA.git"
+  - "cd Athena-VA"
+  - "python -m venv .venv"
+  - ".venv\\Scripts\\activate"
+  - "pip install -r requirements.txt"
+  - "# paste your Groq key into .env"
+  - "copy .env.example .env"
+  - "# typed test first, no mic needed"
+  - "python run_brain_test.py"
+  - "# the real thing: the orb docks at the screen edge"
+  - "python -m athena.main"
+  - "# now say \"hey athena\""
 featured: false
 order: 1
 source: manual

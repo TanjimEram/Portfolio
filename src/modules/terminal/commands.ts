@@ -14,6 +14,10 @@ export interface Project {
   featured: boolean;
   /** e.g. "Shipped — used across NSU MiBC events" */
   status: string | null;
+  /** Intro video under /public, if any */
+  video: string | null;
+  /** How to run it locally: `# direction` lines and shell commands */
+  run: string[];
 }
 export interface TerminalData {
   user: string;
@@ -36,6 +40,7 @@ export type Effect =
   | { type: 'theme'; value: 'dark' | 'light' }
   | { type: 'sound'; value: boolean }
   | { type: 'clear' }
+  | { type: 'video'; src: string; title: string }
   | { type: 'exit' }
   | { type: 'discover'; id: string };
 
@@ -46,10 +51,10 @@ export interface Result {
 
 export const COMMANDS = [
   'help', 'ls', 'cat', 'open', 'live', 'repo', 'whoami', 'skills', 'exp', 'resume', 'contact',
-  'theme', 'sound', 'clear', 'exit', 'find', 'whois',
+  'run', 'demo', 'theme', 'sound', 'clear', 'exit', 'find', 'whois',
 ];
 /** Commands whose first argument is a project */
-export const PROJECT_COMMANDS = ['cat', 'open', 'live', 'repo'];
+export const PROJECT_COMMANDS = ['cat', 'open', 'live', 'repo', 'run', 'demo'];
 
 const HELP = [
   'help                 this list',
@@ -58,6 +63,8 @@ const HELP = [
   'open <project>       go to the project page',
   'live <project>       open the live site',
   'repo <project>       open the source',
+  'run <project>        how to run it on your machine (click a command to copy it)',
+  'demo <project>       play the intro video here',
   'whoami               who runs this place',
   'skills               grouped skills',
   'exp                  experience timeline',
@@ -120,8 +127,36 @@ export function run(data: TerminalData, input: string, opts: { narrow?: boolean 
           `page:   /projects/${p.id}/`,
           ...(p.live ? [`live:   ${p.live}`] : []),
           ...(p.repo ? [`repo:   ${p.repo}`] : []),
+          ...(p.run.length ? [`run:    run ${p.id}`] : []),
+          ...(p.video ? [`demo:   demo ${p.id}`] : []),
         ],
       };
+    }
+
+    case 'run': {
+      const p = pick(data, arg, 'run');
+      if (Array.isArray(p)) return { lines: p };
+      if (!p.run.length) {
+        if (p.live) return { lines: [`${p.title} is a website — nothing to install. opening ${p.live}`], effect: { type: 'open', href: p.live } };
+        return { lines: [`no run script for ${p.title}.`, ...(p.repo ? [`try: repo ${p.id}`] : [])] };
+      }
+      // `# …` lines print dim; commands print as `$ …` and copy on click (runtime)
+      return {
+        lines: [
+          `${p.title} runs on your machine, not in this tab. the script:`,
+          '',
+          ...p.run.map((l) => (l.startsWith('#') ? l : `$ ${l}`)),
+          '',
+          `# click a command to copy it${p.video ? ` · demo ${p.id} plays the intro` : ''}`,
+        ],
+      };
+    }
+
+    case 'demo': {
+      const p = pick(data, arg, 'demo');
+      if (Array.isArray(p)) return { lines: p };
+      if (!p.video) return { lines: [`no intro video for ${p.title} yet.`, ...(p.run.length ? [`try: run ${p.id}`] : [])] };
+      return { lines: [`playing ${p.title} intro…`], effect: { type: 'video', src: p.video, title: p.title } };
     }
 
     case 'open': {

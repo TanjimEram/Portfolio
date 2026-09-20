@@ -8,6 +8,17 @@ color: '#1FA463'
 pattern: grid
 status: in-development
 statusNote: Client project
+run:
+  - "# Python 3.12; SQLite works out of the box, Postgres via DATABASE_URL"
+  - "git clone https://github.com/TanjimEram/WEB_TTurfZone.git"
+  - "cd WEB_TTurfZone"
+  - "python -m venv .venv"
+  - ".venv\\Scripts\\activate"
+  - "pip install -r requirements-dev.txt"
+  - "cp .env.example .env"
+  - "flask --app app db upgrade"
+  - "flask --app app run --debug"
+  - "# http://localhost:5000 — 145 tests: pytest -q"
 featured: false
 order: 3
 source: manual

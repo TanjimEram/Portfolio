@@ -23,6 +23,8 @@ const projects = (await getOrderedProjects()).map((p) => ({
   repo: p.data.repo ?? null,
   live: p.data.live ?? null,
   featured: p.data.featured,
+  video: p.data.video ?? null,
+  run: p.data.run ?? [],
   status: p.data.status ? [statusLabels[p.data.status], p.data.statusNote].filter(Boolean).join(' — ') : null,
 }));
 const experience = (await getCollection('experience'))

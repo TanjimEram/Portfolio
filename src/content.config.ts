@@ -16,6 +16,8 @@ const projects = defineCollection({
       image: image().optional(),
       /** Intro video as a path under /public (e.g. /project_vids/Athena.mp4). A .jpg sibling is used as the poster when it exists. */
       video: z.string().regex(/^\/.+\.mp4$/, 'video must be a /public path ending in .mp4').optional(),
+      /** How to run it locally, one line each: lines starting with `#` are directions, the rest are shell commands. Printed by the terminal's `run` command. */
+      run: z.array(z.string()).optional(),
       /** Hex colour (#rgb or #rrggbb); overrides the accent on the detail page ("chameleon") */
       color: z
         .string()
