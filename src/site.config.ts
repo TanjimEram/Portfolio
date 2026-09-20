@@ -144,11 +144,7 @@ export const siteConfig: SiteConfig = {
   },
   signature: '/images/signature.svg',
 
-  stats: [
-    { value: 2000, suffix: '+', label: 'Orders fulfilled at XeroHour' },
-    { value: 5600, suffix: '+', label: 'Followers grown organically' },
-    { value: 50, suffix: '+', label: 'Art competition podium finishes' },
-  ],
+  stats: [],
 
   resume: '/resume.pdf',
   resumeFilename: 'Tanjim-Eram-Resume.pdf',
@@ -207,8 +203,6 @@ export const siteConfig: SiteConfig = {
   doodles: [
     // curved arrow pointing at the hero CTA
     { selector: '#hero a[href="#projects"]', type: 'arrow-curve', position: 'below', offset: { x: 40, y: 10 }, size: 72, rotation: 200 },
-    // circle around the middle stat
-    { selector: '#hero dl > div:nth-child(2) dd', type: 'circle-scribble', position: 'over', size: '1.35w', offset: { x: -4 } },
     // rough underline under the About heading
     { selector: '#about h2', type: 'underline-rough', position: 'below', size: '1.1w', offset: { x: -4, y: -12 } },
     // star-burst beside the Top Contributor award
