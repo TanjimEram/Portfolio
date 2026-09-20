@@ -126,7 +126,7 @@ export interface SiteConfig {
 
 export const siteConfig: SiteConfig = {
   name: 'Tanjim Eram',
-  role: 'Software engineer · Web developer · Artist',
+  role: 'Aspiring engineer · Web developer · Artist',
   email: 'eramtanjim@gmail.com',
   location: 'Dhaka, Bangladesh',
   links: {
@@ -152,7 +152,7 @@ export const siteConfig: SiteConfig = {
   seo: {
     title: 'Tanjim Eram',
     description:
-      'Software engineer, web developer and artist. Fourth-year CSE student at North South University, Dhaka — open to internships and part-time work.',
+      'Aspiring engineer, web developer and artist. Fourth-year CSE student at North South University, Dhaka — open to internships and part-time work.',
     url: '',
     lang: 'en',
     locale: 'en_US',
